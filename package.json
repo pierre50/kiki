@@ -1,0 +1,25 @@
+{
+  "name": "babylon",
+  "version": "1.0.0",
+  "description": "Babylon JS",
+  "main": "script.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "electron": "electron .",
+    "start": "http-server -c-1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "babylonjs": "^4.2.0",
+    "babylonjs-materials": "^4.2.0",
+    "cannon": "^0.6.2",
+    "http-server": "^13.0.1"
+  },
+  "devDependencies": {
+    "electron": "^14.0.0"
+  }
+}
