@@ -4,12 +4,15 @@ const divFps = document.getElementById("fps");
 var engine = null;
 var scene = null;
 var sceneToRender = null;
-var createDefaultEngine = function() { return new BABYLON.Engine(canvas, false, { preserveDrawingBuffer: true, stencil: true }); };
+var createDefaultEngine = function() { return new BABYLON.Engine(canvas, false); };
 var createScene = function () {
     // This creates a basic Babylon Scene object (non-mesh)
     const scene = new BABYLON.Scene(engine);
-    scene.enablePhysics();
-    scene.collisionsEnabled = true;
+    //scene.enablePhysics();
+    //scene.collisionsEnabled = true;
+    scene.blockMaterialDirtyMechanism = true;
+    scene.clearColor = BABYLON.Color3.Black();
+    scene.getAnimationRatio();
 
     const map = new Map(scene);
     document.addEventListener('pointerup', () => {
@@ -34,7 +37,21 @@ var createScene = function () {
             }
         })
     })
-    
+
+   /*scene.registerBeforeRender(() => {
+        for(var ms in scene.meshes){
+            ms = scene.meshes[ms];
+                debugger
+                if (map.camBox.intersectsMesh(ms, true)) {
+                    ms.isVisible = true;
+                } else {
+                    ms.isVisible = false;
+
+                }
+
+        }
+    });*/
+
     return scene;
 };
 var engine;

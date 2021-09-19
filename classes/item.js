@@ -11,8 +11,8 @@ class Item{
         this.fadeBehavior = new BABYLON.FadeInOutBehavior();
         let mesh = BABYLON.MeshBuilder.CreateBox("box", options, scene);
         mesh.position.set(x, y, z);
-        mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: .2, restitution: 0 });
-        mesh.physicsImpostor.applyImpulse(impulseDirection.scale(impulseMagnitude), mesh.getAbsolutePosition().add(contactLocalRefPoint));
+        //mesh.physicsImpostor = new BABYLON.PhysicsImpostor(mesh, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 1, friction: .2, restitution: 0 });
+        //mesh.physicsImpostor.applyImpulse(impulseDirection.scale(impulseMagnitude), mesh.getAbsolutePosition().add(contactLocalRefPoint));
         mesh.addBehavior(this.fadeBehavior);
         mesh.class = this;
         this.position = {

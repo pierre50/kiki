@@ -21,7 +21,7 @@ class Cell{
 				if (map.grid[x][z].has){
 					map.grid[x][z].has.position.y = _y;
 				}
-				map.map.updateMeshPositions((position) => {
+				map.ground.updateMeshPositions((position) => {
 					position[3 * ( x * (map.size + 1) + z) + 1] = val;
 				}, true)
 			}

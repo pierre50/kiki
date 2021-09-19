@@ -1,19 +1,19 @@
 class Unit{
-	constructor(x, y, z, map){
+	constructor(x, y, z, map, options){
+        this.name = 'unit';
         this.parent = map;
         this.path = [];
-        this.height = 1;
         this.cell = this.parent.grid[Math.round(x)][Math.round(z)];
 		this.cell.has = this;
         this.cell.solid = true;
         
-        let options = {width: .5, height: this.height, depth: .5};
-        let material = new BABYLON.StandardMaterial("material", scene);
-        material.diffuseColor = BABYLON.Color3.FromHexString('#d2c9ac');
-        let mesh = BABYLON.MeshBuilder.CreateBox("sphere", options, scene);
-        mesh.material = material;
+        Object.keys(options).forEach((prop) => {
+			this[prop] = options[prop];
+        })
+
+        const { height, mesh } = this;
         mesh.position.x = x;
-        mesh.position.y = y + (this.height / 2);
+        mesh.position.y = y + height / 2;
         mesh.position.z = z;
         this.rotation = {
             get x(){
@@ -55,7 +55,6 @@ class Unit{
                 mesh.position.z = val;
             }
         }
-        this.mesh = mesh
         this.parent.shadowGenerator.addShadowCaster(mesh);
         //this.parent.waterGround.material.addToRenderList(mesh);
 
@@ -232,4 +231,30 @@ class Unit{
 			this.moveToPath();
 		}
 	}
+}
+
+class Kiki extends Unit{
+	constructor(x, y, z, map){
+        const meshOptions = {
+            height: 0.5,
+            width: 0.5,
+            depth: 0.5,
+        }
+
+        const material = new BABYLON.StandardMaterial("material", scene);
+        material.diffuseColor = BABYLON.Color3.FromHexString('#d2c9ac');
+        material.freeze();
+        
+        const mesh = BABYLON.MeshBuilder.CreateBox("kiki", meshOptions, scene);
+        mesh.material = material;
+
+        const options = {
+            type: "Kiki",
+            life: 10,
+            height: meshOptions.height,
+            mesh
+        }
+
+        super(x, y, z, map, options);
+    }
 }

@@ -180,13 +180,15 @@ function moveTowardPoint(instance, target, speed){
 	let velX = ((tX)/dist)*speed;
     let velZ = ((tZ)/dist)*speed;
     let velY = ((tY)/dist)*speed;
+	console.log("rot", tR, instance.rotation.y);
     if (instance.rotation.y > tR){
         instance.rotation.y -= .1;
     }else if (instance.rotation.y < tR){
         instance.rotation.y += .1;
     }else{
-        instance.rotation.y = tR;
+		instance.rotation.y = tR;
     }
+
 	instance.position.x += velX;
 	instance.position.z += velZ;
 	instance.position.y += velY;
