@@ -23,10 +23,16 @@ class Unit{
                 mesh.rotation.x = val;
             },
             get y(){
-                return mesh.rotation.y;
+                return BABYLON.Tools.ToDegrees(mesh.rotation.y);
             },
             set y(val){
-                mesh.rotation.y = val;
+                if (val < 0){
+                    val = 360;
+                }
+                if (val > 360){
+                    val = 0;
+                }
+                mesh.rotation.y = BABYLON.Tools.ToRadians(val);
             },
             get z(){
                 return mesh.rotation.z;
@@ -60,7 +66,6 @@ class Unit{
 
         this.actionInterval = null;
         this.inactif = true;
-        this.speed = .1;
         this.destMesh = null;
 
         setInterval(() => this.step(), 16.66);
@@ -79,7 +84,7 @@ class Unit{
 			z: dest.position.z,
 			y: dest.position.y
         }
-        this.destMesh = BABYLON.MeshBuilder.CreateTorus("hoop", {thickness: 0.1}, scene);
+        this.destMesh = BABYLON.MeshBuilder.CreateTorus('hoop', {thickness: 0.1}, scene);
         if (this.dest.mesh){
             this.destMesh.parent = this.dest.mesh; 
         }else{
@@ -237,10 +242,11 @@ class Kiki extends Unit{
 	constructor(x, y, z, map){
         
         const options = {
-            type: "Kiki",
+            type: 'Kiki',
             life: 10,
             height: 0.5,
-			mesh: map.instances["kiki1"].createInstance(),
+			mesh: map.instances['kiki1'].createInstance(),
+            speed: 0.05
         }
 
         super(x, y, z, map, options);

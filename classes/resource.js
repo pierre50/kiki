@@ -41,10 +41,10 @@ class resource{
 class Tree extends resource{
 	constructor(x, y, z, map){
 		const options = {
-			type: "Tree",
+			type: 'Tree',
 			life: 10,
 			height: 4,
-			mesh: map.instances["tree1"].createInstance(),
+			mesh: map.instances['tree1'].createInstance(),
 		}
 
 		super(x, y, z, map, options);

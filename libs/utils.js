@@ -172,26 +172,25 @@ function getInstanceDegree(x1, z1, x2, z2){
  * @param {number} speed 
  */
 function moveTowardPoint(instance, target, speed){
-	let dist = pointsDistance(target.x, target.z ,instance.position.x, instance.position.z);
-	let tX = target.x - instance.position.x;
-	let tZ = target.z - instance.position.z;
-    let tY = (target.y + (instance.height / 2)) - instance.position.y;
-    let tR = -Math.atan2(tZ, tX);
-	let velX = ((tX)/dist)*speed;
-    let velZ = ((tZ)/dist)*speed;
-    let velY = ((tY)/dist)*speed;
-	console.log("rot", tR, instance.rotation.y);
-    if (instance.rotation.y > tR){
-        instance.rotation.y -= .1;
-    }else if (instance.rotation.y < tR){
-        instance.rotation.y += .1;
-    }else{
-		instance.rotation.y = tR;
-    }
+	const dist = pointsDistance(target.x, target.z ,instance.position.x, instance.position.z);
+	const tX = target.x - instance.position.x;
+	const tZ = target.z - instance.position.z;
+    const tY = (target.y + (instance.height / 2)) - instance.position.y;
+	const velX = ((tX)/dist)*speed;
+    const velZ = ((tZ)/dist)*speed;
+    const velY = ((tY)/dist)*speed;
+    let tR = (Math.atan2(tX, tZ)) * 180 / Math.PI;
+	if (tR < 0){
+		tR += 360;
+	}
 
 	instance.position.x += velX;
 	instance.position.z += velZ;
 	instance.position.y += velY;
+	if (tR > instance.rotation.y && tR - instance.rotation.y <= 180 ) instance.rotation.y += 6;
+	else if (tR > instance.rotation.y && tR - instance.rotation.y > 180 ) instance.rotation.y -= 6;
+	else if (instance.rotation.y > tR && instance.rotation.y - tR <= 180 ) instance.rotation.y -= 6;
+	else if (instance.rotation.y > tR && instance.rotation.y - tR > 180 ) instance.rotation.y += 6;
 }
 
 /**

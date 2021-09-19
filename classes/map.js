@@ -1,16 +1,16 @@
 class Map{
 	constructor(scene){
-		this.size = 100;
+		this.size = 50;
 		this.grid = [];
 		this.units = [];
 		this.instances = {};
 
 		// This creates and positions a free camera (non-mesh)
-		this.camera = new BABYLON.UniversalCamera("UniversalCamera", new BABYLON.Vector3(0, 10, 0), scene);
+		this.camera = new BABYLON.UniversalCamera('UniversalCamera', new BABYLON.Vector3(0, 10, 0), scene);
 		this.camera.attachControl(canvas, true);
 
 		/*this.camBox = new BABYLON.Mesh.CreateBox('box', 20, scene);
-        let material = new BABYLON.StandardMaterial("material", scene);
+        let material = new BABYLON.StandardMaterial('material', scene);
         material.diffuseColor = BABYLON.Color3.FromHexString('#d2c9ac');
         material.wireframe = true;
 
@@ -19,14 +19,14 @@ class Map{
 		this.camBox.position.z = this.size / 2;*/
 
 		// Lights
-		const hemiLight = new BABYLON.HemisphericLight("hemiLight", new BABYLON.Vector3(0, 0, 0), scene);
+		const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 0, 0), scene);
 		hemiLight.position = new BABYLON.Vector3(0, 0, 0);
 		hemiLight.diffuse = new BABYLON.Color3(0.85,0.85,0.85);
 		hemiLight.specular = new BABYLON.Color3(0.85,0.85,0.85);
 		hemiLight.groundColor = new BABYLON.Color3(0.55,0.55,0.55);
 		hemiLight.intensity = .6; 
 		
-		const light = new BABYLON.DirectionalLight("light", new BABYLON.Vector3(-1, -5, -1), scene);
+		const light = new BABYLON.DirectionalLight('light', new BABYLON.Vector3(-1, -5, -1), scene);
 		light.position = new BABYLON.Vector3(this.size, 30, this.size);
 		light.intensity = .7;
 
@@ -37,23 +37,23 @@ class Map{
 		this.shadowGenerator.blurKernel = 3;
 
 		// Skybox
-		/*const skybox = BABYLON.Mesh.CreateBox('skyBox', 5000.0, scene)
-		const skyboxMaterial = new BABYLON.StandardMaterial('skyBox', scene)
-		skyboxMaterial.backFaceCulling = false
-		skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture('//www.babylonjs.com/assets/skybox/TropicalSunnyDay', scene)
-		skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE
-		skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0)
-		skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0)
-		skyboxMaterial.disableLighting = true
-		skybox.material = skyboxMaterial*/
+		/*const skybox = BABYLON.Mesh.CreateBox('skyBox', 5000.0, scene);
+		const skyboxMaterial = new BABYLON.StandardMaterial('skyBox', scene);
+		skyboxMaterial.backFaceCulling = false;
+		skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture('//www.babylonjs.com/assets/skybox/TropicalSunnyDay', scene);
+		skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+		skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+		skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+		skyboxMaterial.disableLighting = true;
+		skybox.material = skyboxMaterial;
+		skybox.convertToUnIndexedMesh();*/
 
 		// Create terrain material
-		
-		this.terrainMaterial = new BABYLON.TerrainMaterial("terrainMaterial", scene);
-		this.terrainMaterial.mixTexture = new BABYLON.Texture("textures/mixMap.jpg", scene);
-		this.terrainMaterial.diffuseTexture1 = new BABYLON.Texture("textures/grass.png", scene);
-		this.terrainMaterial.diffuseTexture2 = new BABYLON.Texture("textures/grass.png", scene);
-		this.terrainMaterial.diffuseTexture3 = new BABYLON.Texture("textures/grass.png", scene);
+		this.terrainMaterial = new BABYLON.TerrainMaterial('terrainMaterial', scene);
+		this.terrainMaterial.mixTexture = new BABYLON.Texture('textures/mixMap.jpg', scene);
+		this.terrainMaterial.diffuseTexture1 = new BABYLON.Texture('textures/grass.png', scene);
+		this.terrainMaterial.diffuseTexture2 = new BABYLON.Texture('textures/grass.png', scene);
+		this.terrainMaterial.diffuseTexture3 = new BABYLON.Texture('textures/grass.png', scene);
 		this.terrainMaterial.diffuseTexture1.uScale = this.terrainMaterial.diffuseTexture1.vScale = 128;
 		this.terrainMaterial.diffuseTexture2.uScale = this.terrainMaterial.diffuseTexture2.vScale = 128;
 		this.terrainMaterial.diffuseTexture3.uScale = this.terrainMaterial.diffuseTexture3.vScale = 128;
@@ -63,8 +63,8 @@ class Map{
 		this.afterLoad();
 	}
 	initInstances(){
-		this.instances["tree1"] = getTree();
-		this.instances["kiki1"] = getKiki();
+		this.instances['tree1'] = getTree();
+		this.instances['kiki1'] = getKiki();
 	}
 	initMap(){
 		const paths = [];  
@@ -79,7 +79,7 @@ class Map{
 				const y = reliefGrid[i][j];
 				const vector = new BABYLON.Vector3(i, y, j)
 				this.grid[i][j] = new Grass(i, y, j, this);
-				if (ressourceGrid[i][j] === "t"){
+				if (ressourceGrid[i][j] === 't'){
 					new Tree(i, y - .1, j, this);
 				}
 				path.push(vector);
@@ -87,7 +87,7 @@ class Map{
 			paths.push(path);
 		}
 
-		this.ground = BABYLON.MeshBuilder.CreateRibbon("ground", {pathArray: paths}, scene);
+		this.ground = BABYLON.MeshBuilder.CreateRibbon('ground', {pathArray: paths}, scene);
 		this.ground.material = this.terrainMaterial;
 		this.ground.checkCollisions = true;
 		this.ground.receiveShadows = true;
@@ -106,9 +106,9 @@ class Map{
 				}
 	 
 				if (Math.random() < chanceOfSet){
-					grid[i][j] = "t";
+					grid[i][j] = 't';
 				}else{
-					grid[i][j] = "n";
+					grid[i][j] = 'n';
 				}
 			}
 		}
@@ -119,7 +119,7 @@ class Map{
 					if (getPlainCellsAroundPoint(i, j, grid, cursorSize, (cell) => {
 						let pointDistance = pointsDistance(i, j, cell.x, cell.z);
 						if (pointDistance < cursorSize && Math.random() > .1 * (pointDistance * 2)){
-							grid[cell.x][cell.z] = "t";
+							grid[cell.x][cell.z] = 't';
 						}
 					}, true));
 				}

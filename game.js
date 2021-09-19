@@ -1,5 +1,5 @@
 const canvas = document.getElementById('renderCanvas');
-const divFps = document.getElementById("fps");
+const divFps = document.getElementById('fps');
 
 var engine = null;
 var scene = null;
@@ -66,7 +66,7 @@ scene = createScene();
 sceneToRender = scene
 
 engine.runRenderLoop(() => {
-    divFps.innerHTML = engine.getFps().toFixed() + " fps";
+    divFps.innerHTML = engine.getFps().toFixed() + ' fps';
     if (sceneToRender) {
         sceneToRender.render();
     }
