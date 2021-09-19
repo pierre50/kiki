@@ -63,8 +63,8 @@ class Map{
 		this.afterLoad();
 	}
 	initInstances(){
-		this.instances["leaves1"] = getLeaves();
-		this.instances["trunk1"] = getTrunk();
+		this.instances["tree1"] = getTree();
+		this.instances["kiki1"] = getKiki();
 	}
 	initMap(){
 		const paths = [];  

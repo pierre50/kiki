@@ -40,18 +40,11 @@ class resource{
 
 class Tree extends resource{
 	constructor(x, y, z, map){
-		const mesh = new BABYLON.Mesh("tree");
-		mesh.isVisible = false;
-		const leave = map.instances["leaves1"].createInstance();
-		const trunk = map.instances["trunk1"].createInstance();
-		leave.parent = mesh;
-		trunk.parent = mesh;
-		
 		const options = {
 			type: "Tree",
 			life: 10,
 			height: 4,
-			mesh,
+			mesh: map.instances["tree1"].createInstance(),
 		}
 
 		super(x, y, z, map, options);

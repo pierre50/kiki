@@ -235,24 +235,12 @@ class Unit{
 
 class Kiki extends Unit{
 	constructor(x, y, z, map){
-        const meshOptions = {
-            height: 0.5,
-            width: 0.5,
-            depth: 0.5,
-        }
-
-        const material = new BABYLON.StandardMaterial("material", scene);
-        material.diffuseColor = BABYLON.Color3.FromHexString('#d2c9ac');
-        material.freeze();
         
-        const mesh = BABYLON.MeshBuilder.CreateBox("kiki", meshOptions, scene);
-        mesh.material = material;
-
         const options = {
             type: "Kiki",
             life: 10,
-            height: meshOptions.height,
-            mesh
+            height: 0.5,
+			mesh: map.instances["kiki1"].createInstance(),
         }
 
         super(x, y, z, map, options);
