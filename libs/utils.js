@@ -159,9 +159,13 @@ function diff(a, b){
  * @param {number} y 
  */
 function getInstanceDegree(x1, z1, x2, z2){
-	let tX = x1 - x2;
-	let tZ = z1 - z2;
-	return Math.atan2(tZ, tX);
+	const tX = x1 - x2;
+	const tZ = z1 - z2;
+	let result = (Math.atan2(tX, tZ)) * 180 / Math.PI;
+	if (result < 0){
+		result + 360;
+	}
+	return (result + 180) % 360;
 }
 
 /**
@@ -187,10 +191,24 @@ function moveTowardPoint(instance, target, speed){
 	instance.position.x += velX;
 	instance.position.z += velZ;
 	instance.position.y += velY;
-	if (tR > instance.rotation.y && tR - instance.rotation.y <= 180 ) instance.rotation.y += 6;
-	else if (tR > instance.rotation.y && tR - instance.rotation.y > 180 ) instance.rotation.y -= 6;
-	else if (instance.rotation.y > tR && instance.rotation.y - tR <= 180 ) instance.rotation.y -= 6;
-	else if (instance.rotation.y > tR && instance.rotation.y - tR > 180 ) instance.rotation.y += 6;
+	instanceRotate(instance, tR);
+}
+
+function instanceRotate(instance, target){
+	const speed = 6;
+	if (target > instance.rotation.y && target - instance.rotation.y <= 180){
+		const curs = target - instance.rotation.y;
+		instance.rotation.y += curs > speed ? speed : curs;
+	}else if (target > instance.rotation.y && target - instance.rotation.y > 180){
+		const curs = target - instance.rotation.y;
+		instance.rotation.y -= curs > speed ? speed : curs;
+	}else if (instance.rotation.y > target && instance.rotation.y - target <= 180){
+		const curs = instance.rotation.y - target;
+		instance.rotation.y -= curs > speed ? speed : curs;
+	}else if (instance.rotation.y > target && instance.rotation.y - target > 180){
+		const curs = instance.rotation.y - target;
+		instance.rotation.y += curs > speed ? speed : curs;   
+	}
 }
 
 /**
@@ -452,10 +470,11 @@ function getZoneInZoneWithCondition(zone, grid, size, condition){
  * @param {function} condition 
  */
 function findInstancesInSight(instance, condition){
+	const { x, z} = instance.position;
 	let instances = [];
-	for (let i = instance.i - instance.sight; i < instance.i + instance.sight; i++){
-		for (let j = instance.j - instance.sight; j < instance.j + instance.sight; j++){
-			if (pointsDistance(instance.i, instance.j, i, j) <= instance.sight && instance.parent.grid[i] && instance.parent.grid[i][j]){
+	for (let i = x - instance.sight; i < x + instance.sight; i++){
+		for (let j = z - instance.sight; j < z + instance.sight; j++){
+			if (pointsDistance(x, z, i, j) <= instance.sight && instance.parent.grid[i] && instance.parent.grid[i][j]){
 				let cell = instance.parent.grid[i][j];
 				if (cell.has && typeof condition === 'function' && condition(cell.has)){
 					instances.push(cell.has);

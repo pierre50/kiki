@@ -5,18 +5,20 @@ class resource{
 		this.parent = map;
 		this.path = [];
 	
-		this.cell = this.parent.grid[Math.round(x)][Math.round(z)];
-		this.cell.has = this;
-		this.cell.solid = true;
-
 		Object.keys(options).forEach((prop) => {
 			this[prop] = options[prop];
 		})
 		
+		this.cell = this.parent.grid[Math.round(x)][Math.round(z)];
+		this.cell.has = this;
+		this.cell.solid = this.solid;
+
 		const { height, mesh } = this;
 		mesh.position.x = x;
 		mesh.position.y = y + height / 2;
 		mesh.position.z = z;
+		mesh.class = this;
+		mesh.isVisible = false;
 
 		this.position = {
 			get x(){
@@ -27,6 +29,19 @@ class resource{
 			},
 			set y(val){
 				mesh.position.y = val + height / 2;
+			},
+			get z(){
+				return mesh.position.z;
+			},
+		}
+
+
+		this.position = {
+			get x(){
+				return mesh.position.x;
+			},
+			get y(){
+				return mesh.position.y;
 			},
 			get z(){
 				return mesh.position.z;
@@ -45,8 +60,33 @@ class Tree extends resource{
 			life: 10,
 			height: 4,
 			mesh: map.instances['tree1'].createInstance(),
+			solid: true
 		}
 
 		super(x, y, z, map, options);
+	}
+}
+
+class Grass extends resource{
+	constructor(x, y, z, map){
+		const options = {
+			type: 'Grass',
+			life: 1,
+			height: 0,
+			mesh: map.instances[randomItem(['grass1', 'flower1', 'flower2'])].createInstance(),
+			solid: false
+		}
+
+		super(x, y, z, map, options);
+	}
+	eaten(){
+		if (this.life > 0){
+			this.life -= 1
+		}
+
+		if (this.life <= 0){
+			this.life = 0;
+			this.mesh.isVisible = false;
+		}
 	}
 }

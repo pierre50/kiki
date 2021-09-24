@@ -1,23 +1,35 @@
 class Map{
 	constructor(scene){
-		this.size = 50;
+		this.size = 300;
 		this.grid = [];
 		this.units = [];
 		this.instances = {};
 
 		// This creates and positions a free camera (non-mesh)
-		this.camera = new BABYLON.UniversalCamera('UniversalCamera', new BABYLON.Vector3(0, 10, 0), scene);
+		this.camera = new BABYLON.UniversalCamera('UniversalCamera', new BABYLON.Vector3(this.size / 2, 20, this.size / 2), scene);
+		this.camera.rotation.x = Math.PI / 4;
+		this.camera.rotation.y = Math.PI / 4;
 		this.camera.attachControl(canvas, true);
+		//this.camera.inputs.removeByType("FreeCameraKeyboardMoveInput");
+		this.camera.onViewMatrixChangedObservable.add(() => {
+			
+			setTimeout(() => {
+				for(var ms in scene.meshes){
+					ms = scene.meshes[ms];
+					if (ms.name === "ground"){
+						this.ground.dispose();
+					}
+					if (this.camera.isInFrustum(ms)) {
+						ms.isVisible = true;
+					} else {
+						ms.isVisible = false;
+					}
+			
+				}
+			}, 10000)
 
-		/*this.camBox = new BABYLON.Mesh.CreateBox('box', 20, scene);
-        let material = new BABYLON.StandardMaterial('material', scene);
-        material.diffuseColor = BABYLON.Color3.FromHexString('#d2c9ac');
-        material.wireframe = true;
-
-        this.camBox.material = material;
-		this.camBox.position.x = this.size / 2;
-		this.camBox.position.z = this.size / 2;*/
-
+		});
+	
 		// Lights
 		const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 0, 0), scene);
 		hemiLight.position = new BABYLON.Vector3(0, 0, 0);
@@ -48,28 +60,79 @@ class Map{
 		skybox.material = skyboxMaterial;
 		skybox.convertToUnIndexedMesh();*/
 
+
+		this.canvas = this.generateMixTexture();	
 		// Create terrain material
 		this.terrainMaterial = new BABYLON.TerrainMaterial('terrainMaterial', scene);
-		this.terrainMaterial.mixTexture = new BABYLON.Texture('textures/mixMap.jpg', scene);
-		this.terrainMaterial.diffuseTexture1 = new BABYLON.Texture('textures/grass.png', scene);
-		this.terrainMaterial.diffuseTexture2 = new BABYLON.Texture('textures/grass.png', scene);
+		this.terrainMaterial.mixTexture = new BABYLON.Texture(this.getCanvasURL(this.canvas), scene);
+		this.terrainMaterial.diffuseTexture1 = new BABYLON.Texture('textures/dirt.png', scene);
+		this.terrainMaterial.diffuseTexture2 = new BABYLON.Texture('textures/forest.png', scene);
 		this.terrainMaterial.diffuseTexture3 = new BABYLON.Texture('textures/grass.png', scene);
 		this.terrainMaterial.diffuseTexture1.uScale = this.terrainMaterial.diffuseTexture1.vScale = 128;
 		this.terrainMaterial.diffuseTexture2.uScale = this.terrainMaterial.diffuseTexture2.vScale = 128;
 		this.terrainMaterial.diffuseTexture3.uScale = this.terrainMaterial.diffuseTexture3.vScale = 128;
-		
+
 		this.initInstances();
 		this.initMap();
 		this.afterLoad();
 	}
+
+	getCanvasURL(oldCanvas) {
+		//create a new canvas
+		const newCanvas = document.createElement('canvas');
+		const context = newCanvas.getContext('2d');
+		//set dimensions
+		newCanvas.width = oldCanvas.width;
+		newCanvas.height = oldCanvas.height;
+		//apply the old canvas to the new one
+		context.setTransform(1,0,0,-1,0,oldCanvas.height);
+		context.drawImage(oldCanvas, 0, 0);
+		return newCanvas.toDataURL();
+	}
+
+	generateMixTexture(){
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+		canvas.height= this.size;
+		canvas.width = this.size;
+
+		ctx.beginPath();
+		ctx.rect(0, 0, this.size, this.size);
+		ctx.fillStyle = 'blue';
+		ctx.fill();
+
+		const chanceOfForest = 0.0007;
+
+		for (let i = 0; i <= this.size; i++){
+			for (let j = 0; j <= this.size; j++){ 
+				if (Math.random() < chanceOfForest){
+					const cursorSize = randomRange(4, 18);
+					const radgrad2 = ctx.createRadialGradient(i, j, 0, i, j, cursorSize);
+					radgrad2.addColorStop(0, 'rgba(0,255,0,1)');
+					radgrad2.addColorStop(0.7, 'rgba(0,255,0,.7)');
+					radgrad2.addColorStop(1, 'rgba(0,255,0,0)');
+					ctx.fillStyle = radgrad2;
+					ctx.fillRect(0, 0, this.size, this.size);
+				}
+			}
+		}
+
+		return canvas;
+	}
+
 	initInstances(){
 		this.instances['tree1'] = getTree();
 		this.instances['kiki1'] = getKiki();
+		this.instances['grass1'] = getPlant();
+		this.instances['flower1'] = getPlant("white");
+		this.instances['flower2'] = getPlant("yellow");
 	}
+
 	initMap(){
 		const paths = [];  
-		const reliefGrid = this.generateGridRelief();
-		const ressourceGrid = this.generateGridResource();
+		const biomesGrid = this.generateBiomesFromCanvas();
+		const reliefGrid = this.generateGridRelief(biomesGrid);
+		const ressourceGrid = this.generateGridResource(biomesGrid);
 		for (let i = 0; i <= this.size; i++){
 			const path = [];   
 			for (let j = 0; j <= this.size; j++){ 
@@ -77,10 +140,16 @@ class Map{
 					this.grid[i] = [];	
 				}
 				const y = reliefGrid[i][j];
-				const vector = new BABYLON.Vector3(i, y, j)
-				this.grid[i][j] = new Grass(i, y, j, this);
-				if (ressourceGrid[i][j] === 't'){
-					new Tree(i, y - .1, j, this);
+				const vector = new BABYLON.Vector3(i, y, j);
+				const type = biomesGrid[i][j];
+				this.grid[i][j] = new Cell(i, y, j, this, { type });
+				switch (ressourceGrid[i][j]){
+					case 't':
+						new Tree(i, y - .1, j, this);
+						break;
+					case 'g':
+						new Grass(i, y - .1, j, this);
+						break;
 				}
 				path.push(vector);
 			}
@@ -95,38 +164,69 @@ class Map{
 		this.ground.convertToUnIndexedMesh();
 		this.ground.convertToFlatShadedMesh();
 	}
-	generateGridResource(){
+
+	
+	generateBiomesFromCanvas(){
+		const ctx = this.canvas.getContext('2d');
 		const grid = []
-		const chanceOfForest = .004;
-		const chanceOfSet = .01;
 		for (let i = 0; i <= this.size; i++){
 			for (let j = 0; j <= this.size; j++){ 
 				if(!grid[i]){
 					grid[i] = [];	
 				}
-	 
-				if (Math.random() < chanceOfSet){
+				const imageData = ctx.getImageData(j, i, 1, 1).data;
+				const rgb = [imageData[0], imageData[1], imageData[2]];
+				if (rgb[0] > 150){
+					grid[i][j] = 2;
+				}else if (rgb[1] > 150){
+					grid[i][j] = 3;
+				}else{
+					grid[i][j] = 1;
+				}
+			}
+		}
+		return grid;
+	}
+
+	generateGridResource(biomesGrid){
+		const grid = []
+
+		for (let i = 0; i <= this.size; i++){
+			for (let j = 0; j <= this.size; j++){ 
+				if(!grid[i]){
+					grid[i] = [];	
+				}
+				const option = getBiomeOptions(biomesGrid[i][j]);
+				if (Math.random() < option.chanceOfGrass){
+					grid[i][j] = 'g';
+				}else if (Math.random() < option.chanceOfTree){
 					grid[i][j] = 't';
 				}else{
 					grid[i][j] = 'n';
 				}
 			}
 		}
-		for (let i = 0; i <= this.size; i++){
-			for (let j = 0; j <= this.size; j++){ 
-				if (Math.random() < chanceOfForest){
-					const cursorSize = randomRange(4, 18);
-					if (getPlainCellsAroundPoint(i, j, grid, cursorSize, (cell) => {
-						let pointDistance = pointsDistance(i, j, cell.x, cell.z);
-						if (pointDistance < cursorSize && Math.random() > .1 * (pointDistance * 2)){
-							grid[cell.x][cell.z] = 't';
-						}
-					}, true));
+		return grid;
+
+		function getBiomeOptions(biome){
+			const options = {
+				1: { // Plains
+					chanceOfTree: 0.003,
+					chanceOfGrass: 0.3,
+				},
+				2: { // Desert
+					chanceOfTree: 0.00008,
+					chanceOfGrass: 0,
+				},
+				3: { // Forest
+					chanceOfTree: 0.2,
+					chanceOfGrass: 0.005,
 				}
 			}
+			return options[biome];
 		}
-		return grid;
 	}
+
 	generateGridRelief(){
 		const grid = []
 		for (let i = 0; i <= this.size; i++){
@@ -143,8 +243,8 @@ class Map{
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
-			3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
-			4, 4, 4, 4, 4, 4, 4, 4, 4,
+			3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
+			4, 4, 4, 4, 4, 4, 4, 4,
 			5, 5, 5, 5,
 			6, 6,
 			7, 
@@ -175,6 +275,43 @@ class Map{
 		return grid;
 	}
 
+	moveCamera(dir, speed = 1){
+		let angle = BABYLON.Tools.ToDegrees(this.camera.rotation.y);
+		if (dir === 'up' || 'down'){
+			angle += 90;
+		}else{
+			angle += 45;
+		}
+		if (angle < 0){
+			angle += 360;
+		}
+		let rad =  BABYLON.Tools.ToRadians(angle);
+		console.log(rad);
+		if (dir === 'left'){
+			this.camera.position.x += Math.cos(rad) * speed;
+			this.camera.position.z -= Math.sin(rad) * speed;
+		}else if (dir === 'right'){
+			this.camera.position.x -= Math.cos(rad) * speed;
+			this.camera.position.z -= Math.sin(rad) * speed;
+        }
+        if (dir === 'up'){
+			this.camera.position.x -= Math.cos(rad) * speed;
+			this.camera.position.z += Math.sin(rad) * speed;
+        }else if (dir === 'down'){
+			this.camera.position.x += Math.cos(rad) * speed;
+			this.camera.position.z -= Math.sin(rad) * speed;
+        }
+		this.camBox.position.x = this.camera.position.x;
+		this.camBox.position.z = this.camera.position.z;
+	}
+
+	exportCanvas(canvas){
+		const link = document.createElement('a');
+		link.download = 'canvas.png';
+		link.href = canvas.toDataURL();
+		link.click();
+	}
+
 	exportGrid(grid){
 		const { size } = this;
 		const link = document.createElement('a');
@@ -200,7 +337,6 @@ class Map{
 	}
 
 	afterLoad(){
-		window.camera = this.camera;
 		this.units.push(new Kiki(this.size/2, this.grid[this.size/2][this.size/2].position.y, this.size/2, this));
 		Object.keys(this.instances).forEach((prop) => this.instances[prop].isVisible = false);
 	}

@@ -66,14 +66,16 @@ class Unit{
 
         this.actionInterval = null;
         this.inactif = true;
-        this.destMesh = null;
 
         setInterval(() => this.step(), 16.66);
 	}
+    
 	hasPath(){
 		return this.path.length > 0;
 	}
+
 	setDest(dest){
+        this.delDest();
 		if (!dest){
 			this.stop();
 			return;
@@ -84,15 +86,8 @@ class Unit{
 			z: dest.position.z,
 			y: dest.position.y
         }
-        this.destMesh = BABYLON.MeshBuilder.CreateTorus('hoop', {thickness: 0.1}, scene);
-        if (this.dest.mesh){
-            this.destMesh.parent = this.dest.mesh; 
-        }else{
-            this.destMesh.position.x = this.realDest.x;
-            this.destMesh.position.y = this.realDest.y + 0.1; 
-            this.destMesh.position.z = this.realDest.z;
-        }
     }
+
 	setPath(path){
 		if (!path.length){
 			this.stop();
@@ -101,48 +96,70 @@ class Unit{
 		this.inactif = false;
 		this.path = path;
     }
+
     delDest(){
         clearInterval(this.actionInterval);
-        if (this.destMesh){
-            this.destMesh.dispose();
-            this.destMesh = null;
-        }
+        this.actionInterval = null;
     }
+
 	sendTo(dest, action){
         let path = [];
         this.delDest();
-		//No instance we cancel the destination
+
+		// No instance we cancel the destination
 		if (!dest){
 			return false;
 		}
-		//Unit is already beside our target
-		if (action && this.getActionCondition(action, dest)){
-			this.setDest(dest);
-			this.action = action;
-			this.doAction();
-			return true;
-		}
-        //Set unit path
+
+        this.action = action;
+        this.setDest(dest);
+
+		// Unit is already beside our target
+        if (this.action && this.checkDestContact()){
+            return true;
+        }
+
+        // Set unit path
 		if (this.parent.grid[dest.position.x][dest.position.z].solid){
+            // Destination is solid we send it beside the dest
 			path = getInstanceClosestFreeCellPath(this, dest, this.parent);
-			if (!path.length && this.work){
-				this.action = action;
+			if (!path.length){
 				this.affectNewDest();
-				return;
+				return false;
 			}
 		}else{
 			path = getInstancePath(this, dest.position.x, dest.position.z, this.parent);
 		}
-		//Unit found a path, set the action and play walking animation
+
+		// Unit found a path
 		if (path.length){
-			this.setDest(dest);
-			this.action = action;
 			this.setPath(path);
 			return true;
 		}
+
 		this.stop();
 		return false;
 	}
+
+    affectNewDest(){
+		const targets = findInstancesInSight(this, (instance) => this.getActionCondition(this.action, instance));
+		if (targets.length){
+            const closedTarget = targets.find((target) => instanceContactInstance(this, target));
+            if (closedTarget){
+				this.setDest(closedTarget);
+                if (this.checkDestContact()){
+                    return;
+                }
+            }
+			const farTarget = getClosestInstanceWithPath(this, targets);
+			if (farTarget){
+				this.setDest(farTarget.instance);
+                this.setPath(farTarget.path);
+                return;
+			}
+		}
+        this.stop();
+    }
 
 	moveToPath(){
 		const next = this.path[this.path.length - 1];
@@ -152,6 +169,7 @@ class Unit{
             && !nextCell.has.inactif){ 
             return;
         }
+        // Way is blocked
         if (nextCell.solid && this.dest){
 			this.sendTo(this.dest, this.action);
 			return;
@@ -169,31 +187,50 @@ class Unit{
 				this.cell.solid = true;
 			}
             this.path.pop();
-            //Destination moved
-			if (this.dest.position.x !== this.realDest.x || this.dest.position.z !== this.realDest.z){
-				//if (this.player.views[this.dest.i][this.dest.j].viewedBy.length > 1){
+
+            if (this.dest && this.action){
+                // Destination has moved
+                if (this.dest.position.x !== this.realDest.x || this.dest.position.z !== this.realDest.z){
                     this.sendTo(this.dest, this.action);
-                    return;
-				//}
-			}
-            if (this.action && instanceContactInstance(this, this.dest)){
-                this.doAction();
-                return;
-			}
-			if (!this.path.length){
+                }
+                if (!this.checkDestContact() && !this.hasPath){
+                    this.affectNewDest();
+                }
+            }
+
+            // No more path
+			if (!this.hasPath && !this.dest){
 				this.stop();
 			}
 		}else{
-			//Move to next
+			// Move to next
 			moveTowardPoint(this, nextCell.position, this.speed);
 		}
 	}
+
+    checkDestContact(){
+        // Destination in contact
+        if (this.getActionCondition(this.action, this.dest) && instanceContactInstance(this, this.dest)){
+            const newRotationY = getInstanceDegree(this.position.x, this.position.z, this.dest.position.x, this.dest.position.z);
+            if (this.rotation.y === newRotationY){
+                this.doAction();
+            }else{
+                this.rotate = newRotationY;
+            }
+            this.path = [];
+            return true;
+        }else{
+            return false;
+        }
+    }
+
 	getActionCondition(action, target){
-		if (!action || !instanceContactInstance(this, target)){
+		if (!target || !action){
 			return false;
         }
 		const conditions = {
 			'chopwood': (instance) => instance && instance.type === 'Tree' && !instance.isDestroyed,
+			'eat': (instance) => instance && instance.type === 'Grass' && !instance.isDestroyed && instance.life > 0,
 			'forageberry': (instance) => instance && instance.type === 'Berrybush' && !instance.isDestroyed,
 			'build': (instance) => instance && instance.player === this.player && instance.name === 'building' && instance.life > 0 && (!instance.isBuilt || instance.life < instance.lifeMax) && !instance.isDestroyed,
 			'attack': (instance) => instance && instance.player !== this.player && (instance.name === 'building' || instance.name === 'unit') && instance.life > 0 && !instance.isDestroyed,
@@ -201,15 +238,28 @@ class Unit{
 		}
 		return conditions[this.action] ? conditions[this.action](target) : false;
 	}
+
 	stop(){
         this.delDest();
 		this.inactif = true;
 		this.dest = null;
 		this.path = [];
     }
+
     doAction(){
-        this.rotation.y = getInstanceDegree(this.position.x, this.position.z, this.dest.position.x, this.dest.position.z);
+        clearInterval(this.actionInterval);
+        this.actionInterval = null;
+
         switch(this.action){
+            case 'eat':
+                this.actionInterval = setInterval(() => {
+                    if (!this.getActionCondition(this.action, this.dest)){
+                        this.affectNewDest();
+                        return;
+                    }
+                    this.dest.eaten();
+                }, 1000);
+                break;
             case 'chopwood':
                 this.actionInterval = setInterval(() => {
                     if (!this.getActionCondition(this.action, this.dest)){
@@ -231,10 +281,19 @@ class Unit{
                 break;
         }
     }
+
 	step(){
 		if (this.hasPath()){
 			this.moveToPath();
-		}
+		} else if (this.rotate !== null){
+            if (this.rotate === this.rotation.y){
+                this.rotate = null;
+                if (!this.checkDestContact()){
+                    this.stop();
+                }
+            }
+            instanceRotate(this, this.rotate);
+        }
 	}
 }
 
@@ -246,7 +305,8 @@ class Kiki extends Unit{
             life: 10,
             height: 0.5,
 			mesh: map.instances['kiki1'].createInstance(),
-            speed: 0.05
+            speed: 0.05,
+            sight: 4
         }
 
         super(x, y, z, map, options);

@@ -28,11 +28,3 @@ class Cell{
 		}
 	}
 }
-class Grass extends Cell{
-    constructor(x, z, y, map){
-        super(x, z, y, map, {
-            solid: false,
-            type: 'grass'
-        })
-    }
-}
