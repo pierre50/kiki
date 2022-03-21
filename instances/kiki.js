@@ -1,4 +1,4 @@
-function getKiki(){
+function getKiki() {
     const body = getBody();
     const eyes = getEyes();
     const mesh = new BABYLON.Mesh.MergeMeshes([body, eyes], true, true, undefined, false, true);
@@ -11,7 +11,7 @@ function getKiki(){
     mesh.freezeWorldMatrix();
     return mesh;
 
-    function getBody(){
+    function getBody() {
         const options = {
             height: 0.5,
             width: 0.5,
@@ -27,7 +27,7 @@ function getKiki(){
 
         return body;
     }
-    function getEyes(){
+    function getEyes() {
         const options = {
             height: 0.1,
             width: 0.1,
@@ -37,7 +37,7 @@ function getKiki(){
         const material = new BABYLON.StandardMaterial('material', scene);
         material.diffuseColor = BABYLON.Color3.FromHexString('#00000');
         material.freeze();
-        
+
         const eye1 = BABYLON.MeshBuilder.CreateBox('eye', options, scene);
         eye1.material = material;
         eye1.position.z = 0.2;
@@ -49,7 +49,7 @@ function getKiki(){
         eye2.position.z = 0.2;
         eye2.position.y = 0.3;
         eye2.position.x = 0.1;
-        
+
         return new BABYLON.Mesh.MergeMeshes([eye1, eye2], true, true, undefined, false, true);
     }
 }

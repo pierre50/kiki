@@ -1,6 +1,6 @@
 
 
-function getTree(){
+function getTree() {
     const height = 4;
     const trunk = getTrunk(height);
     const leaves = getLeaves(height);
@@ -15,10 +15,10 @@ function getTree(){
     mesh.freezeWorldMatrix();
 
     return mesh;
-    
-    function getTrunk(height){
+
+    function getTrunk(height) {
         const options = {
-            height: height, 
+            height: height,
             width: .5,
             depth: .5,
         }
@@ -33,7 +33,7 @@ function getTree(){
         return trunk;
     }
 
-    function getLeaves(height){
+    function getLeaves(height) {
         const options = {
             width: 2,
             height: 2,
@@ -43,11 +43,11 @@ function getTree(){
         const material = new BABYLON.StandardMaterial('material', scene);
         material.diffuseColor = new BABYLON.Color3.FromHexString('#183d18');
         material.freeze();
-        
+
         const leaves = BABYLON.MeshBuilder.CreateBox('leaves', options, scene)
         leaves.material = material;
         leaves.position.y = height / 2;
-   
+
         return leaves;
     }
 } 

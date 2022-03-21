@@ -1,5 +1,5 @@
-class Map{
-	constructor(scene){
+class Map {
+	constructor(scene) {
 		this.size = 300;
 		this.grid = [];
 		this.units = [];
@@ -12,28 +12,27 @@ class Map{
 		this.camera.attachControl(canvas, true);
 		this.camera.speed = 0.5;
 
-		//this.camera.inputs.removeByType("FreeCameraKeyboardMoveInput");
 		this.camera.onViewMatrixChangedObservable.add(() => {
 			this.camera.position.y = 20;
 			debounce(this.updateInstanceInCamera())
 		});
-	
+
 		// Lights
 		const hemiLight = new BABYLON.HemisphericLight('hemiLight', new BABYLON.Vector3(0, 0, 0), scene);
 		hemiLight.position = new BABYLON.Vector3(0, 0, 0);
-		hemiLight.diffuse = new BABYLON.Color3(0.85,0.85,0.85);
-		hemiLight.specular = new BABYLON.Color3(0.85,0.85,0.85);
-		hemiLight.groundColor = new BABYLON.Color3(0.55,0.55,0.55);
-		hemiLight.intensity = 0.2; 
+		hemiLight.diffuse = new BABYLON.Color3(0.85, 0.85, 0.85);
+		hemiLight.specular = new BABYLON.Color3(0.85, 0.85, 0.85);
+		hemiLight.groundColor = new BABYLON.Color3(0.55, 0.55, 0.55);
+		hemiLight.intensity = 0.2;
 
 		const light = new BABYLON.DirectionalLight('light', new BABYLON.Vector3(-1, -3, 0), scene);
 		light.position = new BABYLON.Vector3(this.size, 50, this.size);
 		light.intensity = 1;
-		
+
 		// Shadows
 		this.shadowGenerator = new BABYLON.ShadowGenerator(1024 * 2, light, true);
 		this.shadowGenerator.setDarkness(0.5);
-		
+
 		// Skybox
 		/*const skybox = BABYLON.Mesh.CreateBox('skyBox', 5000.0, scene);
 		const skyboxMaterial = new BABYLON.StandardMaterial('skyBox', scene);
@@ -47,7 +46,7 @@ class Map{
 		skybox.convertToUnIndexedMesh();*/
 
 
-		this.canvas = this.generateMixTexture();	
+		this.canvas = this.generateMixTexture();
 		// Create terrain material
 		this.terrainMaterial = new BABYLON.TerrainMaterial('terrainMaterial', scene);
 		this.terrainMaterial.mixTexture = new BABYLON.Texture(this.getCanvasURL(this.canvas), scene);
@@ -71,15 +70,15 @@ class Map{
 		newCanvas.width = oldCanvas.width;
 		newCanvas.height = oldCanvas.height;
 		//apply the old canvas to the new one
-		context.setTransform(1,0,0,-1,0,oldCanvas.height);
+		context.setTransform(1, 0, 0, -1, 0, oldCanvas.height);
 		context.drawImage(oldCanvas, 0, 0);
 		return newCanvas.toDataURL();
 	}
 
-	generateMixTexture(){
+	generateMixTexture() {
 		const canvas = document.createElement('canvas');
 		const ctx = canvas.getContext('2d');
-		canvas.height= this.size;
+		canvas.height = this.size;
 		canvas.width = this.size;
 
 		ctx.beginPath();
@@ -89,9 +88,9 @@ class Map{
 
 		const chanceOfForest = 0.0007;
 
-		for (let i = 0; i <= this.size; i++){
-			for (let j = 0; j <= this.size; j++){ 
-				if (Math.random() < chanceOfForest){
+		for (let i = 0; i <= this.size; i++) {
+			for (let j = 0; j <= this.size; j++) {
+				if (Math.random() < chanceOfForest) {
 					const cursorSize = randomRange(4, 18);
 					const radgrad2 = ctx.createRadialGradient(i, j, 0, i, j, cursorSize);
 					radgrad2.addColorStop(0, 'rgba(0,255,0,1)');
@@ -106,8 +105,8 @@ class Map{
 		return canvas;
 	}
 
-	updateInstanceInCamera(){
-		for(var ms in scene.meshes){
+	updateInstanceInCamera() {
+		for (var ms in scene.meshes) {
 			const mesh = scene.meshes[ms];
 			if (this.camera.isInFrustum(mesh) && (mesh.name === 'ground' || instancesDistance(this.camera.position, mesh.position) < 100)) {
 				mesh.isVisible = true;
@@ -119,7 +118,7 @@ class Map{
 		}
 	}
 
-	initInstances(){
+	initInstances() {
 		this.instances['tree1'] = getTree();
 		this.instances['kiki1'] = getKiki();
 		this.instances['grass1'] = getPlant();
@@ -127,22 +126,22 @@ class Map{
 		this.instances['flower2'] = getPlant("yellow");
 	}
 
-	initMap(){
-		const paths = [];  
+	initMap() {
+		const paths = [];
 		const biomesGrid = this.generateBiomesFromCanvas();
 		const reliefGrid = this.generateGridRelief(biomesGrid);
 		const ressourceGrid = this.generateGridResource(biomesGrid);
-		for (let i = 0; i <= this.size; i++){
-			const path = [];   
-			for (let j = 0; j <= this.size; j++){ 
-				if(!this.grid[i]){
-					this.grid[i] = [];	
+		for (let i = 0; i <= this.size; i++) {
+			const path = [];
+			for (let j = 0; j <= this.size; j++) {
+				if (!this.grid[i]) {
+					this.grid[i] = [];
 				}
 				const y = reliefGrid[i][j];
 				const vector = new BABYLON.Vector3(i, y, j);
 				const type = biomesGrid[i][j];
 				this.grid[i][j] = new Cell(i, y, j, this, { type });
-				switch (ressourceGrid[i][j]){
+				switch (ressourceGrid[i][j]) {
 					case 't':
 						new Tree(i, y - .1, j, this);
 						break;
@@ -155,7 +154,7 @@ class Map{
 			paths.push(path);
 		}
 
-		this.ground = BABYLON.MeshBuilder.CreateRibbon('ground', {pathArray: paths}, scene);
+		this.ground = BABYLON.MeshBuilder.CreateRibbon('ground', { pathArray: paths }, scene);
 		this.ground.material = this.terrainMaterial;
 		this.ground.checkCollisions = true;
 		this.ground.receiveShadows = true;
@@ -166,21 +165,21 @@ class Map{
 		this.ground.freezeWorldMatrix();
 	}
 
-	generateBiomesFromCanvas(){
+	generateBiomesFromCanvas() {
 		const ctx = this.canvas.getContext('2d');
 		const grid = []
-		for (let i = 0; i <= this.size; i++){
-			for (let j = 0; j <= this.size; j++){ 
-				if(!grid[i]){
-					grid[i] = [];	
+		for (let i = 0; i <= this.size; i++) {
+			for (let j = 0; j <= this.size; j++) {
+				if (!grid[i]) {
+					grid[i] = [];
 				}
 				const imageData = ctx.getImageData(j, i, 1, 1).data;
 				const rgb = [imageData[0], imageData[1], imageData[2]];
-				if (rgb[0] > 150){
+				if (rgb[0] > 150) {
 					grid[i][j] = 2;
-				}else if (rgb[1] > 150){
+				} else if (rgb[1] > 150) {
 					grid[i][j] = 3;
-				}else{
+				} else {
 					grid[i][j] = 1;
 				}
 			}
@@ -188,27 +187,27 @@ class Map{
 		return grid;
 	}
 
-	generateGridResource(biomesGrid){
+	generateGridResource(biomesGrid) {
 		const grid = []
 
-		for (let i = 0; i <= this.size; i++){
-			for (let j = 0; j <= this.size; j++){ 
-				if(!grid[i]){
-					grid[i] = [];	
+		for (let i = 0; i <= this.size; i++) {
+			for (let j = 0; j <= this.size; j++) {
+				if (!grid[i]) {
+					grid[i] = [];
 				}
 				const option = getBiomeOptions(biomesGrid[i][j]);
-				if (Math.random() < option.chanceOfGrass){
+				if (Math.random() < option.chanceOfGrass) {
 					grid[i][j] = 'g';
-				}else if (Math.random() < option.chanceOfTree){
+				} else if (Math.random() < option.chanceOfTree) {
 					grid[i][j] = 't';
-				}else{
+				} else {
 					grid[i][j] = 'n';
 				}
 			}
 		}
 		return grid;
 
-		function getBiomeOptions(biome){
+		function getBiomeOptions(biome) {
 			const options = {
 				1: { // Plains
 					chanceOfTree: 0.003,
@@ -227,12 +226,12 @@ class Map{
 		}
 	}
 
-	generateGridRelief(){
+	generateGridRelief() {
 		const grid = []
-		for (let i = 0; i <= this.size; i++){
-			for (let j = 0; j <= this.size; j++){ 
-				if(!grid[i]){
-					grid[i] = [];	
+		for (let i = 0; i <= this.size; i++) {
+			for (let j = 0; j <= this.size; j++) {
+				if (!grid[i]) {
+					grid[i] = [];
 				}
 				const y = Math.random() / 4;
 				grid[i][j] = y;
@@ -243,92 +242,92 @@ class Map{
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
+			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
 			3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3,
 			4, 4, 4, 4, 4, 4, 4, 4,
 			5, 5, 5, 5,
 			6, 6,
-			7, 
+			7,
 		];
-		for(let i = 0; i <= this.size; i++){
-			for(let j = 0; j <= this.size; j++){
-				if (Math.random() < chanceOfRelief){
+		for (let i = 0; i <= this.size; i++) {
+			for (let j = 0; j <= this.size; j++) {
+				if (Math.random() < chanceOfRelief) {
 					const level = randomItem(reliefPattern);
 					const cursorSize = level * randomRange(1, 6);
-					const type = randomItem(algoLine()); 
+					const type = randomItem(algoLine());
 					if (getPlainCellsAroundPoint(i, j, grid, cursorSize, (cell) => {
 						const pointDistance = pointsDistance(cell.x, cell.z, i, j);
-						if (pointDistance < cursorSize){
+						if (pointDistance < cursorSize) {
 							const calc = type(pointDistance, cursorSize, level)
-							grid[cell.x][cell.z] = grid[cell.x][cell.z] < calc ? (calc + Math.random() / 4) : grid[cell.x][cell.z] ;
+							grid[cell.x][cell.z] = grid[cell.x][cell.z] < calc ? (calc + Math.random() / 4) : grid[cell.x][cell.z];
 						}
 					}, true));
 				}
 			}
 		}
 
-		function algoLine(){
+		function algoLine() {
 			return [
 				(x, r, c) => -(Math.pow(5, -2) * (5 * 2)) * x + c,
-				(x, r, c) => (-x / (r + r )) * x + c,
+				(x, r, c) => (-x / (r + r)) * x + c,
 			]
 		}
 		return grid;
 	}
 
-	moveCamera(dir, speed = 1){
+	moveCamera(dir, speed = 1) {
 		let angle = BABYLON.Tools.ToDegrees(this.camera.rotation.y);
-		if (dir === 'up' || 'down'){
+		if (dir === 'up' || 'down') {
 			angle += 90;
-		}else{
+		} else {
 			angle += 45;
 		}
-		if (angle < 0){
+		if (angle < 0) {
 			angle += 360;
 		}
-		let rad =  BABYLON.Tools.ToRadians(angle);
+		let rad = BABYLON.Tools.ToRadians(angle);
 		console.log(rad);
-		if (dir === 'left'){
+		if (dir === 'left') {
 			this.camera.position.x += Math.cos(rad) * speed;
 			this.camera.position.z -= Math.sin(rad) * speed;
-		}else if (dir === 'right'){
+		} else if (dir === 'right') {
 			this.camera.position.x -= Math.cos(rad) * speed;
 			this.camera.position.z -= Math.sin(rad) * speed;
-        }
-        if (dir === 'up'){
+		}
+		if (dir === 'up') {
 			this.camera.position.x -= Math.cos(rad) * speed;
 			this.camera.position.z += Math.sin(rad) * speed;
-        }else if (dir === 'down'){
+		} else if (dir === 'down') {
 			this.camera.position.x += Math.cos(rad) * speed;
 			this.camera.position.z -= Math.sin(rad) * speed;
-        }
+		}
 		this.camBox.position.x = this.camera.position.x;
 		this.camBox.position.z = this.camera.position.z;
 	}
 
-	exportCanvas(canvas){
+	exportCanvas(canvas) {
 		const link = document.createElement('a');
 		link.download = 'canvas.png';
 		link.href = canvas.toDataURL();
 		link.click();
 	}
 
-	exportGrid(grid){
+	exportGrid(grid) {
 		const { size } = this;
 		const link = document.createElement('a');
 		link.setAttribute('download', 'map.txt');
 		link.href = makeMapFile();
 		link.click();
-		function makeMapFile(){
+		function makeMapFile() {
 			let textFile;
 			let text = '';
-			for (let i = 0; i <= size; i++){
-				for (let j = 0; j <= size; j++){
+			for (let i = 0; i <= size; i++) {
+				for (let j = 0; j <= size; j++) {
 					text += grid[i][j];
 				}
 				text += '\n';
 			}
-			var data = new Blob([text], {type: 'text/plain'});
+			var data = new Blob([text], { type: 'text/plain' });
 			if (textFile) {
 				window.URL.revokeObjectURL(textFile);
 			}
@@ -337,8 +336,8 @@ class Map{
 		}
 	}
 
-	afterLoad(){
-		this.units.push(new Kiki(this.size/2, this.grid[this.size/2][this.size/2].position.y, this.size/2, this));
+	afterLoad() {
+		this.units.push(new Kiki(this.size / 2, this.grid[this.size / 2][this.size / 2].position.y, this.size / 2, this));
 		Object.keys(this.instances).forEach((prop) => {
 			this.instances[prop].setEnabled(false);
 			this.instances[prop].isVisible = false;

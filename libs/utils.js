@@ -1,29 +1,29 @@
-function refundCost(player, cost){
+function refundCost(player, cost) {
 	Object.keys(cost).forEach(prop => {
 		player[prop] += cost[prop];
 	})
 }
-function payCost(player, cost){
+function payCost(player, cost) {
 	Object.keys(cost).forEach(prop => {
 		player[prop] -= cost[prop];
 	})
 }
-function canAfford(player, cost){
+function canAfford(player, cost) {
 	let can = true
 	Object.keys(cost).forEach(prop => {
-		if (player[prop] < cost[prop]){
+		if (player[prop] < cost[prop]) {
 			can = false;
 		}
 	})
 	return can;
 }
 
-function getIconPath(name){
+function getIconPath(name) {
 	const id = name.split('_')[1];
 	const index = name.split('_')[0];
 	return `data/interface/${id}/${index}_${id}.png`;
 }
-function getTexture(name){
+function getTexture(name) {
 	const id = name.split('_')[1];
 	const index = name.split('_')[0];
 	const spritesheet = app.loader.resources[id].spritesheet;
@@ -31,9 +31,9 @@ function getTexture(name){
 	spritesheet.textures[textureName].hitArea = spritesheet.data.frames[textureName].hitArea;
 	return spritesheet.textures[textureName];
 }
-  
-function changeSpriteColor(sprite, color){
-	if (color === 'blue'){
+
+function changeSpriteColor(sprite, color) {
+	if (color === 'blue') {
 		return;
 	}
 	//8 Hex
@@ -47,17 +47,17 @@ function changeSpriteColor(sprite, color){
 		grey: [0xdbdbdb, 0xc7c7c7, 0xb3b3b3, 0x8f8f8f, 0x6b6b6b, 0x474747, 0x373737, 0x232323],
 		cyan: [0x5fd39f, 0x2bbf93, 0x00ab93, 0x00837b, 0x006f6b, 0x004f4f, 0x003f43, 0x002327],
 	};
-	if (!colors[color]){
+	if (!colors[color]) {
 		return;
 	}
 	let final = [];
-	for (let i = 0; i < source.length; i++){
+	for (let i = 0; i < source.length; i++) {
 		final.push([source[i], colors[color][i]]);
 	}
 	sprite.filters = [new PIXI.filters.MultiColorReplaceFilter(final, .1)];
 }
 
-function debounce(func, timeout = 300){
+function debounce(func, timeout = 300) {
 	let timer;
 	return (...args) => {
 		clearTimeout(timer);
@@ -69,7 +69,7 @@ function debounce(func, timeout = 300){
  * Format a number with three character
  * @param {number} nbr 
  */
-function formatNumber(nbr){
+function formatNumber(nbr) {
 	return ('00' + nbr).slice(-3);
 }
 
@@ -78,11 +78,11 @@ function formatNumber(nbr){
  * @param {number} a 
  * @param {number} b 
  */
-function getPercentage(a, b){
+function getPercentage(a, b) {
 	return Math.floor(a / b * 100);
 }
 
-function getValuePercentage(val, perc){
+function getValuePercentage(val, perc) {
 	return Math.floor((perc * val) / 100);
 }
 /**
@@ -97,12 +97,12 @@ function pointIsBetweenTwoPoint(line1, line2, pnt, lineThickness) {
 	if (L2 == 0) return false;
 	let r = (((pnt.x - line1.x) * (line2.x - line1.x)) + ((pnt.y - line1.y) * (line2.y - line1.y))) / L2;
 	if (r < 0) {
-	  	return (Math.sqrt(((line1.x - pnt.x) * (line1.x - pnt.x)) + ((line1.y - pnt.y) * (line1.y - pnt.y))) <= lineThickness);
+		return (Math.sqrt(((line1.x - pnt.x) * (line1.x - pnt.x)) + ((line1.y - pnt.y) * (line1.y - pnt.y))) <= lineThickness);
 	} else if ((0 <= r) && (r <= 1)) {
-	  	let s = (((line1.y - pnt.y) * (line2.x - line1.x)) - ((line1.x - pnt.x) * (line2.y - line1.y))) / L2;
-	  	return (Math.abs(s) * Math.sqrt(L2) <= lineThickness);
+		let s = (((line1.y - pnt.y) * (line2.x - line1.x)) - ((line1.x - pnt.x) * (line2.y - line1.y))) / L2;
+		return (Math.abs(s) * Math.sqrt(L2) <= lineThickness);
 	} else {
-	  	return (Math.sqrt(((line2.x - pnt.x) * (line2.x - pnt.x)) + ((line2.y - pnt.y) * (line2.y - pnt.y))) <= lineThickness);
+		return (Math.sqrt(((line2.x - pnt.x) * (line2.x - pnt.x)) + ((line2.y - pnt.y) * (line2.y - pnt.y))) <= lineThickness);
 	}
 }
 
@@ -110,8 +110,8 @@ function pointIsBetweenTwoPoint(line1, line2, pnt, lineThickness) {
  * Get a random cell on the grid
  * @param {object} grid 
  */
-function getRandomCell(grid){
-	return grid[Math.floor(Math.random()*size)][Math.floor(Math.random()*size)];
+function getRandomCell(grid) {
+	return grid[Math.floor(Math.random() * size)][Math.floor(Math.random() * size)];
 }
 
 /**
@@ -119,7 +119,7 @@ function getRandomCell(grid){
  * @param {object} a 
  * @param {object} b 
  */
-function instanceContactInstance(a, b){
+function instanceContactInstance(a, b) {
 	return Math.floor(instancesDistance(a.position, b.position)) <= (b.size - 1 || 1) && !b.isDestroyed;
 }
 
@@ -137,7 +137,7 @@ function randomRange(min, max, floor = true) {
  * Get a random item from a array
  * @param {array} array 
  */
-function randomItem(array){
+function randomItem(array) {
 	return array[Math.round(Math.random() * (array.length - 1))];
 }
 
@@ -147,7 +147,7 @@ function randomItem(array){
  * @param {object} b 
  * @param {boolean} useCartesian
  */
-function instancesDistance(a, b){
+function instancesDistance(a, b) {
 	return pointsDistance(a.x, a.z, b.x, b.z);
 }
 
@@ -156,7 +156,7 @@ function instancesDistance(a, b){
  * @param {number} a 
  * @param {number} b 
  */
-function diff(a, b){
+function diff(a, b) {
 	return Math.abs(a - b);
 }
 
@@ -166,11 +166,11 @@ function diff(a, b){
  * @param {number} x 
  * @param {number} y 
  */
-function getInstanceDegree(x1, z1, x2, z2){
+function getInstanceDegree(x1, z1, x2, z2) {
 	const tX = x1 - x2;
 	const tZ = z1 - z2;
 	let result = (Math.atan2(tX, tZ)) * 180 / Math.PI;
-	if (result < 0){
+	if (result < 0) {
 		result + 360;
 	}
 	return (result + 180) % 360;
@@ -183,16 +183,16 @@ function getInstanceDegree(x1, z1, x2, z2){
  * @param {number} y 
  * @param {number} speed 
  */
-function moveTowardPoint(instance, target, speed){
-	const dist = pointsDistance(target.x, target.z ,instance.position.x, instance.position.z);
+function moveTowardPoint(instance, target, speed) {
+	const dist = pointsDistance(target.x, target.z, instance.position.x, instance.position.z);
 	const tX = target.x - instance.position.x;
 	const tZ = target.z - instance.position.z;
 	const tY = (target.y + (instance.height / 2)) - instance.position.y;
-	const velX = ((tX)/dist)*speed;
-	const velZ = ((tZ)/dist)*speed;
-	const velY = ((tY)/dist)*speed;
+	const velX = ((tX) / dist) * speed;
+	const velZ = ((tZ) / dist) * speed;
+	const velY = ((tY) / dist) * speed;
 	let tR = (Math.atan2(tX, tZ)) * 180 / Math.PI;
-	if (tR < 0){
+	if (tR < 0) {
 		tR += 360;
 	}
 
@@ -202,20 +202,20 @@ function moveTowardPoint(instance, target, speed){
 	instanceRotate(instance, tR);
 }
 
-function instanceRotate(instance, target){
+function instanceRotate(instance, target) {
 	const speed = 6;
-	if (target > instance.rotation.y && target - instance.rotation.y <= 180){
+	if (target > instance.rotation.y && target - instance.rotation.y <= 180) {
 		const curs = target - instance.rotation.y;
 		instance.rotation.y += curs > speed ? speed : curs;
-	}else if (target > instance.rotation.y && target - instance.rotation.y > 180){
+	} else if (target > instance.rotation.y && target - instance.rotation.y > 180) {
 		const curs = target - instance.rotation.y;
 		instance.rotation.y -= curs > speed ? speed : curs;
-	}else if (instance.rotation.y > target && instance.rotation.y - target <= 180){
+	} else if (instance.rotation.y > target && instance.rotation.y - target <= 180) {
 		const curs = instance.rotation.y - target;
 		instance.rotation.y -= curs > speed ? speed : curs;
-	}else if (instance.rotation.y > target && instance.rotation.y - target > 180){
+	} else if (instance.rotation.y > target && instance.rotation.y - target > 180) {
 		const curs = instance.rotation.y - target;
-		instance.rotation.y += curs > speed ? speed : curs;   
+		instance.rotation.y += curs > speed ? speed : curs;
 	}
 }
 
@@ -226,7 +226,7 @@ function instanceRotate(instance, target){
  * @param {number} x2 
  * @param {number} y2 
  */
-function pointsDistance(x1, y1, x2, y2){
+function pointsDistance(x1, y1, x2, y2) {
 	let a = x1 - x2;
 	let b = y1 - y2;
 	return Math.sqrt(a * a + b * b);
@@ -251,26 +251,26 @@ function pointInRectangle(x, y, left, top, width, height) {
  * @param {number} y 
  * @param {object} grid 
  */
-function getFreeCellAroundPoint(x, y, grid){
+function getFreeCellAroundPoint(x, y, grid) {
 	let founded;
-	for (let i = 1; i < 100; i++){
+	for (let i = 1; i < 100; i++) {
 		getCellsAroundPoint(x, y, grid, i, (cell) => {
-			if (!cell.solid){
+			if (!cell.solid) {
 				founded = cell;
 			}
 		});
-		if (founded){
+		if (founded) {
 			return founded;
 		}
 	}
 	return null;
 }
 
-function instanceIsSurroundedBySolid(instance){
+function instanceIsSurroundedBySolid(instance) {
 	let size = (instance.size || 1) === 3 ? 2 : 1;
 	let solids = 0;
 	let neighbours = getCellsAroundPoint(instance.i, instance.j, instance.parent.grid, size, (cell) => {
-		if (cell.solid){
+		if (cell.solid) {
 			solids++;
 		}
 		return true;
@@ -278,16 +278,16 @@ function instanceIsSurroundedBySolid(instance){
 	return neighbours.length === solids;
 }
 
-function getNewInstanceClosestFreeCellPath(instance, target, map){
-	for (let i = 1; i < 100; i++){
+function getNewInstanceClosestFreeCellPath(instance, target, map) {
+	for (let i = 1; i < 100; i++) {
 		let size = (target.size || 1) === 3 ? 2 : 1;
 		let paths = [];
 		getCellsAroundPoint(target.i, target.j, map.grid, size * i, (cell) => {
-			if (cell.has && cell.has.type === target.type){
-				getCellsAroundPoint(cell.i, cell.j, map.grid, size, (neighbour) => { 
-					if (!neighbour.solid){
+			if (cell.has && cell.has.type === target.type) {
+				getCellsAroundPoint(cell.i, cell.j, map.grid, size, (neighbour) => {
+					if (!neighbour.solid) {
 						let path = getInstancePath(instance, neighbour.i, neighbour.j, map);
-						if (path.length){
+						if (path.length) {
 							paths.push({
 								target: cell.has,
 								path
@@ -298,7 +298,7 @@ function getNewInstanceClosestFreeCellPath(instance, target, map){
 			}
 		});
 		paths.sort((a, b) => a.path.length - b.path.length);
-		if (paths[0]){
+		if (paths[0]) {
 			return paths[0];
 		}
 	}
@@ -312,18 +312,18 @@ function getNewInstanceClosestFreeCellPath(instance, target, map){
  * @param {number} y 
  * @param {object} map 
  */
-function getInstanceClosestFreeCellPath(instance, target, map){
+function getInstanceClosestFreeCellPath(instance, target, map) {
 	let size = target.size || (target.has && target.has.size) || 1;
 	let paths = [];
 	getPlainCellsAroundPoint(target.position.x, target.position.z, map.grid, size === 3 ? 2 : 1, (cell) => {
 		let path = getInstancePath(instance, cell.position.x, cell.position.z, map);
-		if (path.length){
+		if (path.length) {
 			paths.push(path);
 		}
 	});
 	paths.sort((a, b) => a.length - b.length);
-	
-	if (paths[0]){
+
+	if (paths[0]) {
 		return paths[0];
 	}
 	return [];
@@ -333,12 +333,12 @@ function getInstanceClosestFreeCellPath(instance, target, map){
  * Drawing selection blinking on instance
  * @param {object} instance 
  */
-function drawInstanceBlinkingSelection(instance){
+function drawInstanceBlinkingSelection(instance) {
 	let selection = new PIXI.Graphics();
 	selection.name = 'selection';
 	selection.zIndex = 3;
-	selection.lineStyle(1, 0x00FF00);		
-	const path = [(-32*instance.size), 0, 0,(-16*instance.size), (32*instance.size),0, 0,(16*instance.size)];
+	selection.lineStyle(1, 0x00FF00);
+	const path = [(-32 * instance.size), 0, 0, (-16 * instance.size), (32 * instance.size), 0, 0, (16 * instance.size)];
 	selection.drawPolygon(path);
 	instance.addChildAt(selection, 0);
 	setTimeout(() => {
@@ -358,7 +358,7 @@ function drawInstanceBlinkingSelection(instance){
 	}, 500)
 }
 
-function diff(a,b){
+function diff(a, b) {
 	return Math.abs(a - b);
 }
 
@@ -369,7 +369,7 @@ function diff(a,b){
  * @param {number} y 
  * @param {object} map 
  */
-function getInstancePath(instance, x, z, map){
+function getInstancePath(instance, x, z, map) {
 	const maxZone = 10;
 	const end = map.grid[x][z];
 	const start = map.grid[Math.round(instance.position.x)][Math.round(instance.position.z)];
@@ -378,10 +378,10 @@ function getInstancePath(instance, x, z, map){
 	let minZ = Math.max(Math.min(start.position.z, end.position.z) - maxZone, 0);
 	let maxZ = Math.min(Math.max(start.position.z, end.position.z) + maxZone, map.size);
 	let cloneGrid = [];
-	for(var i = minX; i <= maxX; i++){
-		for(var j = minZ; j <= maxZ; j++){
-			if(cloneGrid[i] == null){
-				cloneGrid[i] = [];	
+	for (var i = minX; i <= maxX; i++) {
+		for (var j = minZ; j <= maxZ; j++) {
+			if (cloneGrid[i] == null) {
+				cloneGrid[i] = [];
 			}
 			cloneGrid[i][j] = {
 				x: map.grid[i][j].position.x,
@@ -399,11 +399,11 @@ function getInstancePath(instance, x, z, map){
 	const cloneStart = cloneGrid[start.position.x][start.position.z];
 	openCells.push(cloneStart);
 	while (!isFinish) {
-		if(openCells.length > 0){
+		if (openCells.length > 0) {
 			//find the lowest f in open cells
 			let lowestF = 0;
-			for(let i = 0; i < openCells.length; i++){
-				if(openCells[i].f < openCells[lowestF].f){
+			for (let i = 0; i < openCells.length; i++) {
+				if (openCells[i].f < openCells[lowestF].f) {
 					lowestF = i;
 				}
 				if (openCells[i].f == openCells[lowestF].f) {
@@ -413,25 +413,25 @@ function getInstancePath(instance, x, z, map){
 				}
 			}
 			let current = openCells[lowestF];
-			if (current === cloneEnd){
+			if (current === cloneEnd) {
 				//reached the end cell
 				isFinish = true;
 			}
 			//calculate path
 			path = [cloneEnd];
 			let temp = current;
-		
-			while(temp.previous){
+
+			while (temp.previous) {
 				path.push(temp.previous);
 				temp = temp.previous;
 			}
-			openCells.splice(openCells.indexOf(current),1);
+			openCells.splice(openCells.indexOf(current), 1);
 			closedCells.push(current);
 			//check neighbours
 			getCellsAroundPoint(current.x, current.z, cloneGrid, 1, (neighbour) => {
-				if(!closedCells.includes(neighbour) && !neighbour.solid && (Math.abs(current.y - neighbour.y) < 1)){
+				if (!closedCells.includes(neighbour) && !neighbour.solid && (Math.abs(current.y - neighbour.y) < 1)) {
 					let tempG = current.g + instancesDistance(neighbour, current);
-					if(!openCells.includes(neighbour)){
+					if (!openCells.includes(neighbour)) {
 						openCells.push(neighbour);
 						neighbour.g = tempG;
 						neighbour.h = instancesDistance(neighbour, cloneEnd);
@@ -440,7 +440,7 @@ function getInstancePath(instance, x, z, map){
 					}
 				}
 			});
-		}else{
+		} else {
 			//no solution
 			path = [];
 			isFinish = true;
@@ -450,23 +450,23 @@ function getInstancePath(instance, x, z, map){
 	return [...path];
 }
 
-function cellIsDiag(src, target){
+function cellIsDiag(src, target) {
 	return Math.abs(target.x - src.x) === Math.abs(target.z - src.z);
 }
-function getZoneInZoneWithCondition(zone, grid, size, condition){
-	for(let i = zone.minX; i <= zone.maxX; i++){
-		for(let j = zone.minY; j <= zone.maxY; j++){
-			if (!grid[i] || !grid[i][j]){
+function getZoneInZoneWithCondition(zone, grid, size, condition) {
+	for (let i = zone.minX; i <= zone.maxX; i++) {
+		for (let j = zone.minY; j <= zone.maxY; j++) {
+			if (!grid[i] || !grid[i][j]) {
 				continue;
 			}
 			let isFree = true;
 			getPlainCellsAroundPoint(i, j, grid, size, (cell) => {
-				if (!condition(cell)){
+				if (!condition(cell)) {
 					isFree = false;
 				}
 			});
-			if (isFree){
-				return {i, j};
+			if (isFree) {
+				return { i, j };
 			}
 		}
 	}
@@ -477,14 +477,14 @@ function getZoneInZoneWithCondition(zone, grid, size, condition){
  * @param {object} instance 
  * @param {function} condition 
  */
-function findInstancesInSight(instance, condition){
-	const { x, z} = instance.position;
+function findInstancesInSight(instance, condition) {
+	const { x, z } = instance.position;
 	let instances = [];
-	for (let i = x - instance.sight; i < x + instance.sight; i++){
-		for (let j = z - instance.sight; j < z + instance.sight; j++){
-			if (pointsDistance(x, z, i, j) <= instance.sight && instance.parent.grid[i] && instance.parent.grid[i][j]){
+	for (let i = x - instance.sight; i < x + instance.sight; i++) {
+		for (let j = z - instance.sight; j < z + instance.sight; j++) {
+			if (pointsDistance(x, z, i, j) <= instance.sight && instance.parent.grid[i] && instance.parent.grid[i][j]) {
 				let cell = instance.parent.grid[i][j];
-				if (cell.has && typeof condition === 'function' && condition(cell.has)){
+				if (cell.has && typeof condition === 'function' && condition(cell.has)) {
 					instances.push(cell.has);
 				}
 			}
@@ -497,46 +497,46 @@ function findInstancesInSight(instance, condition){
  * Render cell if is on sight of instance
  * @param {object} instance 
  */
-function renderCellOnInstanceSight(instance){
+function renderCellOnInstanceSight(instance) {
 	getPlainCellsAroundPoint(instance.i, instance.j, instance.player.views, instance.sight, (cell) => {
-		if (pointsDistance(instance.i, instance.j, cell.i, cell.j) <= instance.sight){
+		if (pointsDistance(instance.i, instance.j, cell.i, cell.j) <= instance.sight) {
 			let globalCell = instance.parent.grid[cell.i][cell.j];
 			globalCell.removeFog();
-			if (globalCell.has){
+			if (globalCell.has) {
 				if (globalCell.has.type === 'Tree'
 					&& globalCell.has.quantity > 0
-					&& instance.player.foundedTrees.indexOf(globalCell.has) === -1){
+					&& instance.player.foundedTrees.indexOf(globalCell.has) === -1) {
 					instance.player.foundedTrees.push(globalCell.has);
 				}
 				if (globalCell.has.type === 'Berrybush'
 					&& globalCell.has.quantity > 0
-					&& instance.player.foundedBerrybushs.indexOf(globalCell.has) === -1){
+					&& instance.player.foundedBerrybushs.indexOf(globalCell.has) === -1) {
 					instance.player.foundedBerrybushs.push(globalCell.has);
 				}
 				if (globalCell.has.name === 'building'
 					&& globalCell.has.life > 0
-					&& globalCell.has.player !== instance.player 
-					&& instance.player.foundedEnemyBuildings.indexOf(globalCell.has) === -1){
+					&& globalCell.has.player !== instance.player
+					&& instance.player.foundedEnemyBuildings.indexOf(globalCell.has) === -1) {
 					instance.player.foundedEnemyBuildings.push(globalCell.has);
 				}
 				//if (globalCell.has.player && globalCell.has.player.isPlayed){
-					//globalCell.has.visible = true;
+				//globalCell.has.visible = true;
 				//}
 			}
-			if (cell.viewedBy.indexOf(instance) === -1){
+			if (cell.viewedBy.indexOf(instance) === -1) {
 				cell.viewedBy.push(instance);
 			}
 			cell.viewed = true;
 		}
 	})
 }
-function clearCellOnInstanceSight(instance){
+function clearCellOnInstanceSight(instance) {
 	getPlainCellsAroundPoint(instance.i, instance.j, instance.player.views, instance.sight, (cell) => {
-		if (pointsDistance(instance.i, instance.j, cell.i, cell.j) <= instance.sight){
+		if (pointsDistance(instance.i, instance.j, cell.i, cell.j) <= instance.sight) {
 			cell.viewedBy.splice(cell.viewedBy.indexOf(instance), 1);
-			if (instance.parent){
+			if (instance.parent) {
 				let globalCell = instance.parent.grid[cell.i][cell.j];
-				if (!cell.viewedBy.length){
+				if (!cell.viewedBy.length) {
 					globalCell.setFog();
 					/*if (globalCell.has){
 						if (globalCell.has.player && !globalCell.has.player.isPlayed && globalCell.has.name === 'unit'){
@@ -549,7 +549,7 @@ function clearCellOnInstanceSight(instance){
 	})
 }
 
-function getPositionInZoneAroundInstance(instance, grid, space, size, allowInclined = false, extraCondition){
+function getPositionInZoneAroundInstance(instance, grid, space, size, allowInclined = false, extraCondition) {
 	const maxSpace = space[1];
 	const minSpace = space[0];
 	const zone = {
@@ -562,14 +562,14 @@ function getPositionInZoneAroundInstance(instance, grid, space, size, allowIncli
 		return (
 			cell.i > 0 && cell.j > 0 && cell.i < cell.parent.size && cell.j < cell.parent.size &&
 			instancesDistance(instance, cell, true) > minSpace &&
-			instancesDistance(instance, cell, true) < maxSpace && 
+			instancesDistance(instance, cell, true) < maxSpace &&
 			!cell.solid && !cell.border && (allowInclined || !cell.inclined)
 			&& (!extraCondition || extraCondition(cell)));
 	});
 	return pos || null;
 }
 
-function instanceIsInPlayerSight(instance, player){
+function instanceIsInPlayerSight(instance, player) {
 	return player.views[instance.i][instance.j].viewedBy.length > 0;
 }
 /**
@@ -578,21 +578,21 @@ function instanceIsInPlayerSight(instance, player){
  * @param {number} startY 
  * @param {number} dist 
  */
-function getPlainCellsAroundPoint(startX, startZ, grid, dist, callback, onlyCoordinate = false){
+function getPlainCellsAroundPoint(startX, startZ, grid, dist, callback, onlyCoordinate = false) {
 	let result = [];
-	if (!dist){
-		const cell = onlyCoordinate ? {x: startX, z: startZ} : grid[startX][startZ];
-		if (typeof callback === 'function'){
+	if (!dist) {
+		const cell = onlyCoordinate ? { x: startX, z: startZ } : grid[startX][startZ];
+		if (typeof callback === 'function') {
 			callback(cell, result.length)
 		}
 		result.push(cell);
 		return result;
 	}
-	for (let i = startX - dist; i <= startX + dist; i++){
-		for (let j = startZ - dist; j <= startZ + dist; j++){
-			if (grid[i] !== undefined && grid[i][j] !== undefined){
-				const cell = onlyCoordinate ? {x: i, z: j} : grid[i][j];
-				if (typeof callback === 'function'){
+	for (let i = startX - dist; i <= startX + dist; i++) {
+		for (let j = startZ - dist; j <= startZ + dist; j++) {
+			if (grid[i] !== undefined && grid[i][j] !== undefined) {
+				const cell = onlyCoordinate ? { x: i, z: j } : grid[i][j];
+				if (typeof callback === 'function') {
 					callback(cell, result.length);
 				}
 				result.push(cell);
@@ -608,15 +608,15 @@ function getPlainCellsAroundPoint(startX, startZ, grid, dist, callback, onlyCoor
  * @param {number} startY 
  * @param {number} dist 
  */
-function getCellsAroundPoint(startX, startY, grid, dist, callback){
+function getCellsAroundPoint(startX, startY, grid, dist, callback) {
 	let result = [];
-	if (!dist){
+	if (!dist) {
 		const cell = grid[startX][startY];
-		if (typeof callback === 'function'){
-			if (callback(cell)){
+		if (typeof callback === 'function') {
+			if (callback(cell)) {
 				result.push(cell);
 			}
-		}else{
+		} else {
 			result.push(cell);
 		}
 		return result;
@@ -627,31 +627,31 @@ function getCellsAroundPoint(startX, startY, grid, dist, callback){
 	let velX = 1;
 	let velY = 0;
 	let line = 0;
-	for(let i = 0; i < 8+(dist-1)*8; i++){
+	for (let i = 0; i < 8 + (dist - 1) * 8; i++) {
 		x += velX;
 		y += velY;
-		if (grid[x] && grid[x][y]){
+		if (grid[x] && grid[x][y]) {
 			const cell = grid[x][y];
-			if (typeof callback === 'function'){
-				if (callback(cell)){
+			if (typeof callback === 'function') {
+				if (callback(cell)) {
 					result.push(cell);
 				}
-			}else{
+			} else {
 				result.push(cell);
 			}
 		}
 		line++;
-		if (line === dist * 2 ){
+		if (line === dist * 2) {
 			let speed = loop > 0 ? -1 : 1;
-			if (loop%2){
+			if (loop % 2) {
 				velX = speed;
 				velY = 0;
-			}else{
+			} else {
 				velX = 0;
 				velY = speed;
 			}
 			line = 0;
-			loop++;						
+			loop++;
 		}
 	}
 	return result;
@@ -662,9 +662,9 @@ function getCellsAroundPoint(startX, startY, grid, dist, callback){
  * @param {object} instance 
  * @param {object} instances 
  */
-function getClosestInstance(instance, instances){
+function getClosestInstance(instance, instances) {
 	let distances = [];
-	for (let i = 0; i < instances.length; i++){
+	for (let i = 0; i < instances.length; i++) {
 		distances.push({
 			instance: instances[i],
 			dist: instancesDistance(instance, instances[i])
@@ -674,11 +674,11 @@ function getClosestInstance(instance, instances){
 	return (distances.length && distances[0].instance) || false;
 }
 
-function getClosestInstanceWithPath(instance, instances){
+function getClosestInstanceWithPath(instance, instances) {
 	let distances = [];
-	for (let i = 0; i < instances.length; i++){
+	for (let i = 0; i < instances.length; i++) {
 		let path = getInstanceClosestFreeCellPath(instance, instances[i], instance.parent);
-		if (path.length){
+		if (path.length) {
 			distances.push({
 				instance: instances[i],
 				path,

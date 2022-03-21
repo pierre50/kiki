@@ -1,5 +1,5 @@
-class Cell{
-	constructor(x, y, z, map, options){
+class Cell {
+	constructor(x, y, z, map, options) {
 		this.name = 'cell';
 		this.parent = map;
 		this.has = null;
@@ -7,7 +7,7 @@ class Cell{
 
 		Object.keys(options).forEach((prop) => {
 			this[prop] = options[prop];
-        })
+		})
 
 		let _y = y;
 		this.position = {
@@ -16,13 +16,13 @@ class Cell{
 			get y() {
 				return _y;
 			},
-			set y(val){
+			set y(val) {
 				_y = val;
-				if (map.grid[x][z].has){
+				if (map.grid[x][z].has) {
 					map.grid[x][z].has.position.y = _y;
 				}
 				map.ground.updateMeshPositions((position) => {
-					position[3 * ( x * (map.size + 1) + z) + 1] = val;
+					position[3 * (x * (map.size + 1) + z) + 1] = val;
 				}, true)
 			}
 		}

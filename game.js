@@ -4,7 +4,7 @@ const divFps = document.getElementById('fps');
 var engine = null;
 var scene = null;
 var sceneToRender = null;
-var createDefaultEngine = function() { return new BABYLON.Engine(canvas, false, null, true); };
+var createDefaultEngine = function () { return new BABYLON.Engine(canvas, false, null, true); };
 var createScene = function () {
 	// This creates a basic Babylon Scene object (non-mesh)
 	const scene = new BABYLON.Scene(engine);
@@ -18,41 +18,25 @@ var createScene = function () {
 
 	const map = new Map(scene);
 
-	/*document.addEventListener('keydown', (evt) => {
-        switch (evt.code){
-            case 'ArrowLeft': 
-                map.moveCamera('left');
-                break;
-            case 'ArrowRight': 
-                map.moveCamera('right');
-                break;  
-            case 'ArrowUp': 
-                map.moveCamera('up');
-                break;  
-            case 'ArrowDown': 
-                map.moveCamera('down');
-                break;
-		}
-	})*/
 	document.addEventListener('pointerup', () => {
 		const pickResult = scene.pick(scene.pointerX, scene.pointerY);
-		if (!pickResult || !pickResult.pickedPoint){
+		if (!pickResult || !pickResult.pickedPoint) {
 			return;
 		}
 		const x = Math.round(pickResult.pickedPoint.x);
 		const z = Math.round(pickResult.pickedPoint.z);
 		map.units.forEach((unit) => {
-			if (pickResult.pickedMesh && pickResult.pickedMesh.class){
+			if (pickResult.pickedMesh && pickResult.pickedMesh.class) {
 				const dest = pickResult.pickedMesh.class;
-				switch (dest.type){
+				switch (dest.type) {
 					case "Grass":
 						unit.sendTo(dest, 'eat');
 						break;
 					default:
 						unit.sendTo(map.grid[x][z]);
 				}
-			} else if (pickResult.pickedPoint){
-				if (map.grid[x][z]){
+			} else if (pickResult.pickedPoint) {
+				if (map.grid[x][z]) {
 					unit.sendTo(map.grid[x][z]);
 				}
 			}
@@ -64,7 +48,7 @@ var createScene = function () {
 var engine;
 try {
 	engine = createDefaultEngine();
-} catch(e) {
+} catch (e) {
 	console.log('the available createEngine function failed. Creating the default engine instead');
 	engine = createDefaultEngine();
 }
