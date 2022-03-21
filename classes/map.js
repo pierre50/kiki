@@ -10,24 +10,12 @@ class Map{
 		this.camera.rotation.x = Math.PI / 4;
 		this.camera.rotation.y = Math.PI / 4;
 		this.camera.attachControl(canvas, true);
+		this.camera.speed = 0.5;
+
 		//this.camera.inputs.removeByType("FreeCameraKeyboardMoveInput");
 		this.camera.onViewMatrixChangedObservable.add(() => {
-			
-			setTimeout(() => {
-				for(var ms in scene.meshes){
-					ms = scene.meshes[ms];
-					if (ms.name === "ground"){
-						this.ground.dispose();
-					}
-					if (this.camera.isInFrustum(ms)) {
-						ms.isVisible = true;
-					} else {
-						ms.isVisible = false;
-					}
-			
-				}
-			}, 10000)
-
+			this.camera.position.y = 20;
+			debounce(this.updateInstanceInCamera())
 		});
 	
 		// Lights
@@ -36,18 +24,16 @@ class Map{
 		hemiLight.diffuse = new BABYLON.Color3(0.85,0.85,0.85);
 		hemiLight.specular = new BABYLON.Color3(0.85,0.85,0.85);
 		hemiLight.groundColor = new BABYLON.Color3(0.55,0.55,0.55);
-		hemiLight.intensity = .6; 
+		hemiLight.intensity = 0.2; 
+
+		const light = new BABYLON.DirectionalLight('light', new BABYLON.Vector3(-1, -3, 0), scene);
+		light.position = new BABYLON.Vector3(this.size, 50, this.size);
+		light.intensity = 1;
 		
-		const light = new BABYLON.DirectionalLight('light', new BABYLON.Vector3(-1, -5, -1), scene);
-		light.position = new BABYLON.Vector3(this.size, 30, this.size);
-		light.intensity = .7;
-
 		// Shadows
-		this.shadowGenerator = new BABYLON.ShadowGenerator(1024, light);
-		this.shadowGenerator.useBlurExponentialShadowMap = true;
-		this.shadowGenerator.useKernelBlur = true;
-		this.shadowGenerator.blurKernel = 3;
-
+		this.shadowGenerator = new BABYLON.ShadowGenerator(1024 * 2, light, true);
+		this.shadowGenerator.setDarkness(0.5);
+		
 		// Skybox
 		/*const skybox = BABYLON.Mesh.CreateBox('skyBox', 5000.0, scene);
 		const skyboxMaterial = new BABYLON.StandardMaterial('skyBox', scene);
@@ -120,6 +106,19 @@ class Map{
 		return canvas;
 	}
 
+	updateInstanceInCamera(){
+		for(var ms in scene.meshes){
+			const mesh = scene.meshes[ms];
+			if (this.camera.isInFrustum(mesh) && (mesh.name === 'ground' || instancesDistance(this.camera.position, mesh.position) < 100)) {
+				mesh.isVisible = true;
+				mesh.setEnabled(true);
+			} else {
+				mesh.isVisible = false;
+				mesh.setEnabled(false);
+			}
+		}
+	}
+
 	initInstances(){
 		this.instances['tree1'] = getTree();
 		this.instances['kiki1'] = getKiki();
@@ -160,12 +159,13 @@ class Map{
 		this.ground.material = this.terrainMaterial;
 		this.ground.checkCollisions = true;
 		this.ground.receiveShadows = true;
-		//this.ground.physicsImpostor = new BABYLON.PhysicsImpostor(this.ground, BABYLON.PhysicsImpostor.HeightmapImpostor, { mass: 0 });
+		this.ground.cullingStrategy = BABYLON.AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY;
+		this.ground.doNotSyncBoundingInfo = false;
 		this.ground.convertToUnIndexedMesh();
 		this.ground.convertToFlatShadedMesh();
+		this.ground.freezeWorldMatrix();
 	}
 
-	
 	generateBiomesFromCanvas(){
 		const ctx = this.canvas.getContext('2d');
 		const grid = []
@@ -234,12 +234,13 @@ class Map{
 				if(!grid[i]){
 					grid[i] = [];	
 				}
-				const y = Math.random() / 2;
+				const y = Math.random() / 4;
 				grid[i][j] = y;
 			}
 		}
-		const chanceOfRelief = .01;
+		const chanceOfRelief = .005;
 		const reliefPattern = [
+			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
 			2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 
@@ -253,13 +254,13 @@ class Map{
 			for(let j = 0; j <= this.size; j++){
 				if (Math.random() < chanceOfRelief){
 					const level = randomItem(reliefPattern);
-					const cursorSize = level * randomRange(1, 4);
+					const cursorSize = level * randomRange(1, 6);
 					const type = randomItem(algoLine()); 
 					if (getPlainCellsAroundPoint(i, j, grid, cursorSize, (cell) => {
 						const pointDistance = pointsDistance(cell.x, cell.z, i, j);
 						if (pointDistance < cursorSize){
 							const calc = type(pointDistance, cursorSize, level)
-							grid[cell.x][cell.z] = grid[cell.x][cell.z] < calc ? (calc + Math.random() / 2) : grid[cell.x][cell.z];
+							grid[cell.x][cell.z] = grid[cell.x][cell.z] < calc ? (calc + Math.random() / 4) : grid[cell.x][cell.z] ;
 						}
 					}, true));
 				}
@@ -338,6 +339,10 @@ class Map{
 
 	afterLoad(){
 		this.units.push(new Kiki(this.size/2, this.grid[this.size/2][this.size/2].position.y, this.size/2, this));
-		Object.keys(this.instances).forEach((prop) => this.instances[prop].isVisible = false);
+		Object.keys(this.instances).forEach((prop) => {
+			this.instances[prop].setEnabled(false);
+			this.instances[prop].isVisible = false;
+		});
+
 	}
 }

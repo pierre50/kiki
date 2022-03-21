@@ -32,8 +32,9 @@ function getPlant(color = "green"){
 	grass3.position.x = (0.1 * dist);
 	grass3.position.z = (0.3 * dist) - 0.5;
 
-    const mesh = new BABYLON.Mesh.MergeMeshes([grass1, grass2, grass3], true, true, undefined, false, true);
-    mesh.convertToUnIndexedMesh();
-    mesh.convertToFlatShadedMesh();
-    return mesh;
+    const mesh = new BABYLON.Mesh.MergeMeshes([grass1, grass2, grass3]);
+    grass1.convertToUnIndexedMesh();
+    grass1.convertToFlatShadedMesh();
+	
+    return grass1;
 } 
