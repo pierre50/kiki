@@ -14,42 +14,28 @@ class resource{
 		this.cell.solid = this.solid;
 
 		const { height, mesh } = this;
-		mesh.position.x = x;
-		mesh.position.y = y + height / 2;
-		mesh.position.z = z;
-		mesh.class = this;
-		mesh.isVisible = false;
+		if (mesh){
+			mesh.position.x = x;
+			mesh.position.y = y + height / 2;
+			mesh.position.z = z;
+			mesh.class = this;
 
-		this.position = {
-			get x(){
-				return mesh.position.x;
-			},
-			get y(){
-				return mesh.position.y;
-			},
-			set y(val){
-				mesh.position.y = val + height / 2;
-			},
-			get z(){
-				return mesh.position.z;
-			},
+			this.position = {
+				get x(){
+					return mesh.position.x;
+				},
+				get y(){
+					return mesh.position.y;
+				},
+				get z(){
+					return mesh.position.z;
+				}
+			}
+			this.parent.shadowGenerator.addShadowCaster(mesh);
+			//this.parent.waterGround.material.addToRenderList(mesh);
+		}else{
+			this.position = {x,y,z}
 		}
-
-
-		this.position = {
-			get x(){
-				return mesh.position.x;
-			},
-			get y(){
-				return mesh.position.y;
-			},
-			get z(){
-				return mesh.position.z;
-			},
-		}
-		this.parent.shadowGenerator.addShadowCaster(mesh);
-		//this.parent.waterGround.material.addToRenderList(mesh);
-		
 	}
 }
 
@@ -72,8 +58,6 @@ class Grass extends resource{
 		const options = {
 			type: 'Grass',
 			life: 1,
-			height: 0,
-			mesh: map.instances[randomItem(['grass1', 'flower1', 'flower2'])].createInstance(),
 			solid: false
 		}
 
@@ -86,7 +70,6 @@ class Grass extends resource{
 
 		if (this.life <= 0){
 			this.life = 0;
-			this.mesh.isVisible = false;
 		}
 	}
 }

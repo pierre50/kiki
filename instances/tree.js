@@ -5,8 +5,15 @@ function getTree(){
     const trunk = getTrunk(height);
     const leaves = getLeaves(height);
     const mesh = new BABYLON.Mesh.MergeMeshes([trunk, leaves], true, true, undefined, false, true);
+
+    mesh.receiveShadows = true;
+    mesh.cullingStrategy = BABYLON.AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY;
+    mesh.doNotSyncBoundingInfo = false;
+    mesh.ignoreNonUniformScaling = true;
     mesh.convertToUnIndexedMesh();
     mesh.convertToFlatShadedMesh();
+    mesh.freezeWorldMatrix();
+
     return mesh;
     
     function getTrunk(height){

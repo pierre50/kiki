@@ -57,6 +57,14 @@ function changeSpriteColor(sprite, color){
 	sprite.filters = [new PIXI.filters.MultiColorReplaceFilter(final, .1)];
 }
 
+function debounce(func, timeout = 300){
+	let timer;
+	return (...args) => {
+		clearTimeout(timer);
+		timer = setTimeout(() => { func.apply(this, args); }, timeout);
+	};
+}
+
 /**
  * Format a number with three character
  * @param {number} nbr 
@@ -121,7 +129,7 @@ function instanceContactInstance(a, b){
  * @param {number} max 
  */
 function randomRange(min, max, floor = true) {
-    let r = Math.random() * (max - min + 1) + min;
+	let r = Math.random() * (max - min + 1) + min;
 	return floor ? Math.floor(r) : r;
 }
 
@@ -179,11 +187,11 @@ function moveTowardPoint(instance, target, speed){
 	const dist = pointsDistance(target.x, target.z ,instance.position.x, instance.position.z);
 	const tX = target.x - instance.position.x;
 	const tZ = target.z - instance.position.z;
-    const tY = (target.y + (instance.height / 2)) - instance.position.y;
+	const tY = (target.y + (instance.height / 2)) - instance.position.y;
 	const velX = ((tX)/dist)*speed;
-    const velZ = ((tZ)/dist)*speed;
-    const velY = ((tY)/dist)*speed;
-    let tR = (Math.atan2(tX, tZ)) * 180 / Math.PI;
+	const velZ = ((tZ)/dist)*speed;
+	const velY = ((tY)/dist)*speed;
+	let tR = (Math.atan2(tX, tZ)) * 180 / Math.PI;
 	if (tR < 0){
 		tR += 360;
 	}
@@ -234,7 +242,7 @@ function pointsDistance(x1, y1, x2, y2){
  * @param {number} height 
  */
 function pointInRectangle(x, y, left, top, width, height) {
-    return (x > left && x < left + width && y > top && y < top + height);
+	return (x > left && x < left + width && y > top && y < top + height);
 }
 
 /**
@@ -424,14 +432,14 @@ function getInstancePath(instance, x, z, map){
 				if(!closedCells.includes(neighbour) && !neighbour.solid && (Math.abs(current.y - neighbour.y) < 1)){
 					let tempG = current.g + instancesDistance(neighbour, current);
 					if(!openCells.includes(neighbour)){
-                        openCells.push(neighbour);
-                        neighbour.g = tempG;
-                        neighbour.h = instancesDistance(neighbour, cloneEnd);
-                        neighbour.f = neighbour.g + neighbour.h;
-                        neighbour.previous = current
+						openCells.push(neighbour);
+						neighbour.g = tempG;
+						neighbour.h = instancesDistance(neighbour, cloneEnd);
+						neighbour.f = neighbour.g + neighbour.h;
+						neighbour.previous = current
 					}
 				}
-            });
+			});
 		}else{
 			//no solution
 			path = [];
@@ -443,7 +451,7 @@ function getInstancePath(instance, x, z, map){
 }
 
 function cellIsDiag(src, target){
-    return Math.abs(target.x - src.x) === Math.abs(target.z - src.z);
+	return Math.abs(target.x - src.x) === Math.abs(target.z - src.z);
 }
 function getZoneInZoneWithCondition(zone, grid, size, condition){
 	for(let i = zone.minX; i <= zone.maxX; i++){

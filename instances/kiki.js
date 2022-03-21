@@ -2,8 +2,13 @@ function getKiki(){
     const body = getBody();
     const eyes = getEyes();
     const mesh = new BABYLON.Mesh.MergeMeshes([body, eyes], true, true, undefined, false, true);
+    mesh.receiveShadows = true;
+    mesh.cullingStrategy = BABYLON.AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY;
+    mesh.doNotSyncBoundingInfo = false;
+    mesh.ignoreNonUniformScaling = true;
     mesh.convertToUnIndexedMesh();
     mesh.convertToFlatShadedMesh();
+    mesh.freezeWorldMatrix();
     return mesh;
 
     function getBody(){

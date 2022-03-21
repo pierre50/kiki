@@ -15,6 +15,9 @@ class Unit{
         mesh.position.x = x;
         mesh.position.y = y + height / 2;
         mesh.position.z = z;
+        this.parent.shadowGenerator.addShadowCaster(mesh);
+        //this.parent.waterGround.material.addToRenderList(mesh);
+
         this.rotation = {
             get x(){
                 return mesh.rotation.x;
@@ -61,11 +64,12 @@ class Unit{
                 mesh.position.z = val;
             }
         }
-        this.parent.shadowGenerator.addShadowCaster(mesh);
-        //this.parent.waterGround.material.addToRenderList(mesh);
 
         this.actionInterval = null;
         this.inactif = true;
+
+        this.action = "eat";
+        this.affectNewDest();
 
         setInterval(() => this.step(), 16.66);
 	}
