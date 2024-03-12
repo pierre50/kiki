@@ -2,24 +2,77 @@
   "name": "babylon",
   "version": "1.0.0",
   "description": "Babylon JS",
-  "main": "script.js",
-  "directories": {
-    "lib": "lib"
-  },
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "electron": "electron .",
-    "start": "http-server -c-1"
+    "compile": "pnpm build && electron-builder",
+    "start": "webpack serve",
+    "deploy": "pnpm build && gh-pages -d build",
+    "webpack": "webpack --mode development",
+    "build": "webpack --mode production",
+    "format": "find app -name '*.js' | xargs -I{} ./node_modules/.bin/prettier --write --single-quote {}",
+    "prewebpack": "pnpm clean",
+    "precommit": "lint-staged",
+    "clean": "rm -rf ./build && mkdir ./build",
+    "lint": "eslint ./app/**/*.js"
   },
-  "author": "",
-  "license": "ISC",
+  "build": {
+    "appId": "your.id",
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "files": [
+      "main.js",
+      {
+        "from": "build",
+        "to": ".",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "babylonjs": "^4.2.0",
-    "babylonjs-materials": "^4.2.0",
-    "cannon": "^0.6.2",
-    "http-server": "^13.0.1"
+    "popmotion": "^11.0.5",
+    "redux": "^5.0.1"
   },
   "devDependencies": {
-    "electron": "^14.0.0"
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babylonjs/core": "^6.46.0",
+    "@babylonjs/materials": "^6.46.0",
+    "babel-core": "^4.7.16",
+    "babel-loader": "^9.1.3",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-stage-0": "^6.24.1",
+    "copy-webpack-plugin": "^12.0.2",
+    "css-loader": "^6.10.0",
+    "electron": "^29.1.1",
+    "electron-builder": "^24.13.3",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.3",
+    "file-loader": "^6.2.0",
+    "gh-pages": "^6.1.1",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "prettier": "3.2.5",
+    "raw-loader": "^4.0.2",
+    "rimraf": "^5.0.5",
+    "style-loader": "^3.3.4",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.0.2"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "plugins": [
+    "prettier"
+  ],
+  "lint-staged": {
+    "*.{js,json}": [
+      "prettier --write --single-quote",
+      "git add"
+    ]
   }
 }

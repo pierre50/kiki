@@ -1,0 +1,243 @@
+:root {
+  --main-background-color: #12171ecf;
+  --main-border-color: transparent;
+  --main-border-radius: 2px;
+  --main-border-size: 0px;
+  --main-border-style: solid;
+  --main-shadow-color: rgba(0, 0, 0, 0.7);
+  --main-box-shadow: var(--main-shadow-color) 0px 0px 3px 0px;
+}
+
+html,
+body,
+input,
+textarea,
+select,
+button {
+  border-color: #5e5d5a;
+  color: #e5e0d8;
+  font-size: 12px;
+  text-shadow: 1px 1px black;
+  font-family: sans-serif;
+  -webkit-font-smoothing: none;
+}
+
+body {
+  height: 100vh;
+  overflow: hidden;
+  margin: 0;
+  -webkit-user-select: none;
+  user-select: none;
+  background-color: black;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+#game {
+  flex: 1;
+}
+
+.bar {
+  background: var(--main-background-color);
+  width: 100%;
+}
+
+.img {
+  object-fit: none;
+  height: 45px;
+  width: 45px;
+  border: var(--main-border-size) var(--main-border-style) var(--main-border-color);
+  border-radius: var(--main-border-radius);
+  box-shadow: var(--main-box-shadow);
+}
+
+.topbar {
+  position: absolute;
+  top: 0;
+  padding: 5px 10px;
+  display: grid;
+  font-weight: bold;
+  grid-template-columns: 33% 33% 33%;
+  width: calc(100% - 20px);
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.bottombar {
+  position: absolute;
+  bottom: 0;
+  display: grid;
+  height: 122px;
+  grid-template-columns: 120px auto 242px;
+  width: calc(100% - 10px);
+  grid-gap: 5px;
+  padding: 5px;
+  z-index: 2000;
+}
+
+.bottombar-info {
+  position: relative;
+  border: var(--main-border-size) var(--main-border-style) var(--main-border-color);
+  border-radius: var(--main-border-radius);
+  box-shadow: var(--main-box-shadow);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 2px;
+  gap: 1px;
+}
+
+.bottombar-info #icon {
+  object-fit: none;
+  height: 45px;
+  width: 45px;
+}
+
+.bottombar-info #infos {
+  position: absolute;
+  left: 45%;
+  top: 30px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+
+.bottombar-info #info {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.bottombar-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: 5px 0;
+  overflow: auto;
+  max-width: 500px;
+}
+
+.bottombar-menu-column {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.bottombar-menu-box {
+  position: relative;
+  display: flex;
+}
+
+.bottombar-map-wrap {
+  position: relative;
+  top: 2px;
+  filter: drop-shadow(0px 0px 3px var(--main-shadow-color));
+}
+
+.bottombar-map {
+  width: 100%;
+  height: 100%;
+  background: black;
+  clip-path: polygon(50% 1%, 100% 48%, 50% 96%, 0% 48%);
+}
+
+.bottombar-map canvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.age {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.resources {
+  display: flex;
+  gap: 10px;
+}
+
+.resource {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.resource > div {
+  width: 40px;
+}
+
+.resource-content {
+  object-fit: none;
+  height: 13px;
+  width: 20px;
+  border: var(--main-border-size) var(--main-border-style) var(--main-border-color);
+  border-radius: var(--main-border-radius);
+  box-shadow: var(--main-box-shadow);
+}
+
+.message {
+  z-index: 1000;
+  position: fixed;
+  width: 100%;
+  text-align: center;
+}
+
+.message-content {
+  color: #da2424;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 3px;
+}
+
+.resource-quantity {
+  position: absolute;
+  top: 20px;
+  left: 45%;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.unit-loading {
+  position: absolute;
+  top: 52px;
+  left: 45%;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.building-loading,
+#population {
+  position: absolute;
+  left: 40%;
+  top: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.toggle{
+  position: fixed;
+  bottom: -119px;
+  right: 0;
+  transform: rotate(64deg);
+  height: 192px;
+  width: 100px;
+  border-top-left-radius: 3px;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
