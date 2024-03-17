@@ -1,3 +1,5 @@
+import { data } from "../constants"
+
 export function getIconPath(name) {
   const id = name.split('_')[1]
   const index = name.split('_')[0]
@@ -26,8 +28,8 @@ export function getBuildingRubbleTextureNameWithSize(size) {
   }
 }
 
-export function getBuildingAsset(type, owner, assets) {
-  const path = assets.cache.get(owner.civ.toLowerCase()).buildings
+export function getBuildingAsset(type, owner, data) {
+  const path = data[owner.civ.toLowerCase()].buildings
   if (path[owner.age][type]) {
     return path[owner.age][type]
   } else if (path[owner.age - 1][type]) {

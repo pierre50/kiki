@@ -1,4 +1,3 @@
-import { accelerator } from '../constants'
 import * as exports from './maths'
 Object.entries(exports).forEach(([name, exported]) => (window[name] = exported))
 
@@ -8,7 +7,24 @@ Object.entries(exports).forEach(([name, exported]) => (window[name] = exported))
  * @param {object} b
  */
 export function instanceContactInstance(a, b) {
-  return Math.floor(instancesDistance(a, b)) <= (b.size - 1 || 1) && !b.isDestroyed
+  return Math.floor(instancesDistance(a, b)) <= ((b.size + 1) || 2) && !b.isDestroyed
+}
+
+export function instanceRotate(instance, target) {
+  const speed = 6
+  if (target > instance.rotation.y && target - instance.rotation.y <= 180) {
+    const curs = target - instance.rotation.y
+    instance.rotation.y += curs > speed ? speed : curs
+  } else if (target > instance.rotation.y && target - instance.rotation.y > 180) {
+    const curs = target - instance.rotation.y
+    instance.rotation.y -= curs > speed ? speed : curs
+  } else if (instance.rotation.y > target && instance.rotation.y - target <= 180) {
+    const curs = instance.rotation.y - target
+    instance.rotation.y -= curs > speed ? speed : curs
+  } else if (instance.rotation.y > target && instance.rotation.y - target > 180) {
+    const curs = instance.rotation.y - target
+    instance.rotation.y += curs > speed ? speed : curs
+  }
 }
 
 /**
@@ -18,15 +34,23 @@ export function instanceContactInstance(a, b) {
  * @param {number} y
  * @param {number} speed
  */
-export function moveTowardPoint(instance, x, y, speed) {
-  let dist = pointsDistance(x, y, instance.x, instance.y)
-  let tX = x - instance.x
-  let tY = y - instance.y
-  let velX = (tX / dist) * (speed * accelerator)
-  let velY = (tY / dist) * (speed * accelerator)
-  instance.degree = getInstanceDegree(instance, x, y)
-  instance.x += velX
-  instance.y += velY
+export function moveTowardPoint(instance, target, speed) {
+  const dist = pointsDistance(target.x, target.z, instance.position.x, instance.position.z)
+  const tX = target.x - instance.position.x
+  const tZ = target.z - instance.position.z
+  const tY = target.y + instance.height / 2 - instance.position.y
+  const velX = (tX / dist) * speed
+  const velZ = (tZ / dist) * speed
+  const velY = (tY / dist) * speed
+  let tR = (Math.atan2(tX, tZ) * 180) / Math.PI
+  if (tR < 0) {
+    tR += 360
+  }
+
+  instance.position.x += velX
+  instance.position.z += velZ
+  instance.position.y += velY
+  instanceRotate(instance, tR)
 }
 
 /**
@@ -55,8 +79,8 @@ export function getFreeCellAroundPoint(x, y, size, grid, condition) {
 export function getInstanceClosestFreeCellPath(instance, target, map) {
   let size = target.size || (target.has && target.has.size) || 1
   let paths = []
-  getCellsAroundPoint(target.i, target.j, map.grid, size === 3 ? 2 : 1, cell => {
-    let path = getInstancePath(instance, cell.i, cell.j, map)
+  getPlainCellsAroundPoint(target.position.x, target.position.z, map.grid, size === 3 ? 2 : 1, cell => {
+    let path = getInstancePath(instance, cell.position.x, cell.position.z, map)
     if (path.length) {
       paths.push(path)
     }
@@ -76,37 +100,23 @@ export function getInstanceClosestFreeCellPath(instance, target, map) {
  * @param {number} y
  * @param {object} map
  */
-export function getInstancePath(instance, x, y, map) {
+export function getInstancePath(instance, x, z, map) {
   const maxZone = 10
-  const end = map.grid[x][y]
-  const start = map.grid[instance.i][instance.j]
-  let minX = Math.max(Math.min(start.i, end.i) - maxZone, 0)
-  let maxX = Math.min(Math.max(start.i, end.i) + maxZone, map.size)
-  let minY = Math.max(Math.min(start.j, end.j) - maxZone, 0)
-  let maxY = Math.min(Math.max(start.j, end.j) + maxZone, map.size)
-
-  function isCellReachable(cell) {
-    if (cell.solid) {
-      return false
-    }
-    const allowWaterCellCategory = instance.category === 'Boat'
-    return allowWaterCellCategory ? cell.category === 'Water' : cell.category !== 'Water'
-  }
-
+  const end = map.grid[x][z]
+  const start = map.grid[Math.round(instance.position.x)][Math.round(instance.position.z)]
+  let minX = Math.max(Math.min(start.position.x, end.position.x) - maxZone, 0)
+  let maxX = Math.min(Math.max(start.position.x, end.position.x) + maxZone, map.size)
+  let minZ = Math.max(Math.min(start.position.z, end.position.z) - maxZone, 0)
+  let maxZ = Math.min(Math.max(start.position.z, end.position.z) + maxZone, map.size)
   let cloneGrid = []
   for (var i = minX; i <= maxX; i++) {
-    for (var j = minY; j <= maxY; j++) {
+    for (var j = minZ; j <= maxZ; j++) {
       if (cloneGrid[i] == null) {
         cloneGrid[i] = []
       }
       cloneGrid[i][j] = {
-        i,
-        j,
-        x: map.grid[i][j].x,
-        y: map.grid[i][j].y,
-        z: map.grid[i][j].z,
+        position: { x: map.grid[i][j].position.x, y: map.grid[i][j].position.y, z: map.grid[i][j].position.z },
         solid: map.grid[i][j].solid,
-        category: map.grid[i][j].category,
       }
     }
   }
@@ -114,18 +124,17 @@ export function getInstancePath(instance, x, y, map) {
   let path = []
   let openCells = []
   let closedCells = []
-  const cloneEnd = cloneGrid[end.i][end.j]
-  const cloneStart = cloneGrid[start.i][start.j]
+  const cloneEnd = cloneGrid[end.position.x][end.position.z]
+  const cloneStart = cloneGrid[start.position.x][start.position.z]
   openCells.push(cloneStart)
   while (!isFinish) {
     if (openCells.length > 0) {
-      // find the lowest f in open cells
+      //find the lowest f in open cells
       let lowestF = 0
       for (let i = 0; i < openCells.length; i++) {
         if (openCells[i].f < openCells[lowestF].f) {
           lowestF = i
         }
-
         if (openCells[i].f == openCells[lowestF].f) {
           if (openCells[i].g > openCells[lowestF].g) {
             lowestF = i
@@ -134,10 +143,10 @@ export function getInstancePath(instance, x, y, map) {
       }
       let current = openCells[lowestF]
       if (current === cloneEnd) {
-        // reached the end cell
+        //reached the end cell
         isFinish = true
       }
-      // calculate path
+      //calculate path
       path = [cloneEnd]
       let temp = current
 
@@ -147,12 +156,9 @@ export function getInstancePath(instance, x, y, map) {
       }
       openCells.splice(openCells.indexOf(current), 1)
       closedCells.push(current)
-      // check neighbours
-      getCellsAroundPoint(current.i, current.j, cloneGrid, 1, neighbour => {
-        const validDiag =
-          !cellIsDiag(current, neighbour) ||
-          (isCellReachable(cloneGrid[current.i][neighbour.j]) && isCellReachable(cloneGrid[neighbour.i][current.j]))
-        if (!closedCells.includes(neighbour) && isCellReachable(neighbour) && validDiag) {
+      //check neighbours
+      getCellsAroundPoint(current.position.x, current.position.z, cloneGrid, 1, neighbour => {
+        if (!closedCells.includes(neighbour) && !neighbour.solid && Math.abs(current.position.y - neighbour.position.y) < 1) {
           let tempG = current.g + instancesDistance(neighbour, current)
           if (!openCells.includes(neighbour)) {
             openCells.push(neighbour)
@@ -164,7 +170,7 @@ export function getInstancePath(instance, x, y, map) {
         }
       })
     } else {
-      // no solution
+      //no solution
       path = []
       isFinish = true
     }
@@ -193,7 +199,7 @@ export function getZoneInGridWithCondition(zone, grid, size, condition) {
         }
       })
       if (isFree) {
-        return { i, j }
+        return { x: i, z: j }
       }
     }
   }
@@ -204,16 +210,13 @@ export function getZoneInGridWithCondition(zone, grid, size, condition) {
  * @param {object} instance
  * @param {export function} condition
  */
-export function findInstancesInSight(instance, condition) {
+export function findInstancesInSight(instance, grid, condition) {
+  const { x, z } = instance.position
   let instances = []
-  for (let i = instance.i - instance.sight; i < instance.i + instance.sight; i++) {
-    for (let j = instance.j - instance.sight; j < instance.j + instance.sight; j++) {
-      if (
-        pointsDistance(instance.i, instance.j, i, j) <= instance.sight &&
-        instance.parent.grid[i] &&
-        instance.parent.grid[i][j]
-      ) {
-        let cell = instance.parent.grid[i][j]
+  for (let i = x - instance.sight; i < x + instance.sight; i++) {
+    for (let j = z - instance.sight; j < z + instance.sight; j++) {
+      if (pointsDistance(x, z, i, j) <= instance.sight && grid[i] && grid[i][j]) {
+        let cell = grid[i][j]
         if (cell.has && typeof condition === 'function' && condition(cell.has)) {
           instances.push(cell.has)
         }
@@ -350,28 +353,28 @@ export function instanceIsInPlayerSight(instance, player) {
  * @param {number} startY
  * @param {number} dist
  */
-export function getPlainCellsAroundPoint(startX, startY, grid, dist, callback) {
+export function getPlainCellsAroundPoint(startX, startZ, grid, dist, callback, onlyCoordinate = false) {
   let result = []
   if (!dist) {
-    const cell = grid[startX][startY]
+    const cell = onlyCoordinate ? { x: startX, z: startZ } : grid[startX][startZ]
     if (typeof callback === 'function') {
-      if (callback(cell)) {
+      if (callback(cell, result.length)){
         result.push(cell)
       }
-    } else {
+    }else{
       result.push(cell)
     }
     return result
   }
   for (let i = startX - dist; i <= startX + dist; i++) {
-    for (let j = startY - dist; j <= startY + dist; j++) {
-      if (grid[i] && grid[i][j]) {
-        const cell = grid[i][j]
+    for (let j = startZ - dist; j <= startZ + dist; j++) {
+      if (grid[i] !== undefined && grid[i][j] !== undefined) {
+        const cell = onlyCoordinate ? { x: i, z: j } : grid[i][j]
         if (typeof callback === 'function') {
-          if (callback(cell)) {
+          if (callback(cell, result.length)){
             result.push(cell)
           }
-        } else {
+        }else{
           result.push(cell)
         }
       }

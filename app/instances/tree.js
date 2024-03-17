@@ -26,10 +26,10 @@ export function getTree(scene) {
         material.diffuseColor = Color3.FromHexString('#52392a');
         material.freeze();
 
-        const trunk = new MeshBuilder.CreateBox('trunk', options, scene);
-        trunk.material = material;
+        const mesh = new MeshBuilder.CreateBox('trunk', options, scene);
+        mesh.material = material;
 
-        return trunk;
+        return mesh;
     }
 
     function getLeaves(height) {
@@ -43,10 +43,10 @@ export function getTree(scene) {
         material.diffuseColor = Color3.FromHexString('#183d18');
         material.freeze();
 
-        const leaves = new MeshBuilder.CreateBox('leaves', options, scene)
-        leaves.material = material;
-        leaves.position.y = height / 2;
+        const mesh = new MeshBuilder.CreateBox('leaves', options, scene)
+        mesh.material = material;
+        mesh.position.y = height / 2;
 
-        return leaves;
+        return mesh;
     }
 } 

@@ -8,35 +8,34 @@ import {
   getActionCondition,
   canUpdateMinimap,
 } from '../../lib'
-import { sound } from '@pixi/sound'
+import { config, technology, populationMax } from '../../constants'
+import Unit from '../unit'
 import { Building } from '../building'
-import { Unit } from '../unit'
-import { populationMax } from '../../constants'
 
 export class Player {
-  constructor({ i, j, age, civ, color, type, isPlayed = false }, context) {
+  constructor(options, context) {
     this.name = 'player'
     this.context = context
 
     const { map } = context
+
     this.id = uuidv4()
-    this.parent = map
-    this.i = i
-    this.j = j
-    this.civ = civ
-    this.age = age
+
+    Object.keys(options).forEach((prop) => {
+        this[prop] = options[prop];
+    })
+
     this.wood = map.devMode ? 10000 : 200
     this.food = map.devMode ? 10000 : 200
     this.stone = map.devMode ? 10000 : 150
     this.gold = map.devMode ? 10000 : 0
-    this.type = type
     this.units = []
     this.buildings = []
     this.population = 0
     this.populationMax = map.devMode ? populationMax : 0
-    this.color = color
-    this.colorHex = getHexColor(color)
-    this.isPlayed = isPlayed
+    this.colorHex = getHexColor(this.color)
+    this.config = {...config}
+    this.techs = { ...technology }
     this.hasBuilt = map.devMode ? Object.keys(this.config.buildings).map(key => key) : []
     this.technologies = []
     this.cellViewed = 0
@@ -59,7 +58,7 @@ export class Player {
               menu.updateTerrainMiniMap(i, j)
             }
           },
-          viewed: (isPlayed && type === 'Human' && map.revealTerrain) || false,
+          viewed: (this.isPlayed && this.type === 'Human' && map.revealTerrain) || false,
         }
       }
     }
@@ -166,9 +165,9 @@ export class Player {
     return false
   }
 
-  createUnit(i, j, type) {
+  createUnit(x, z, type) {
     const { context } = this
-    let unit = new Unit({ i, j, type, owner: this }, context)
+    let unit = new Unit({ x, z, type, owner: this }, context)
     this.units.push(unit)
     canUpdateMinimap(unit, context.player) && context.menu.updatePlayerMiniMapEvt(this)
     return unit
@@ -176,7 +175,7 @@ export class Player {
 
   createBuilding(i, j, type, isBuilt = false) {
     const { context } = this
-    const building = new Building({ i, j, owner: this, type, isBuilt }, context)
+    const building = new Building({ x: i, z: j, owner: this, type, isBuilt }, context)
     this.buildings.push(building)
     canUpdateMinimap(building, context.player) && context.menu.updatePlayerMiniMapEvt(this)
     return building

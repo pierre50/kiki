@@ -1,8 +1,8 @@
 import { Player } from './player'
 
 export class Human extends Player {
-  constructor({ i, j, age, civ, color, isPlayed }, context) {
-    super({ i, j, age, civ, color, type: 'Human', isPlayed }, context)
+  constructor({ x, z, age, civ, color, isPlayed }, context) {
+    super({ x, z, age, civ, color, type: 'Human', isPlayed }, context)
     this.selectedUnits = []
     this.selectedUnit = null
     this.selectedBuilding = null

@@ -106,8 +106,8 @@ export function randomItem(array = []) {
  * @param {object} b
  * @param {boolean} useCartesian
  */
-export function instancesDistance(a, b, useCartesian = true) {
-  return useCartesian ? pointsDistance(a.i, a.j, b.i, b.j) : pointsDistance(a.x, a.y, b.x, b.y)
+export function instancesDistance(a, b) {
+  return pointsDistance(a.position.x, a.position.z, b.position.x, b.position.z)
 }
 
 /**
@@ -134,20 +134,24 @@ export function diff(a, b) {
  * @param {number} x
  * @param {number} y
  */
-export function getInstanceDegree(instance, x, y) {
-  return getPointsDegree(instance.x, instance.y, x, y)
+export function getInstanceDegree(instance, x, z) {
+  return getPointsDegree(instance.position.x, instance.position.z, x, z)
 }
-
+ 
 /**
  * Get degree of instance according to a point
  * @param {object} instance
  * @param {number} x
  * @param {number} y
  */
-export function getPointsDegree(x1, y1, x2, y2) {
-  let tX = x2 - x1
-  let tY = y2 - y1
-  return Math.round((Math.atan2(tY, tX) * 180) / Math.PI + 180)
+export function getPointsDegree(x1, z1, x2, z2) {
+  const tX = x1 - x2;
+	const tZ = z1 - z2;
+	let result = (Math.atan2(tX, tZ)) * 180 / Math.PI;
+	if (result < 0) {
+		result + 360;
+	}
+	return (result + 180) % 360;
 }
 
 export function degreesToRadians(degrees) {
@@ -192,7 +196,7 @@ export function pointInRectangle(x, y, left, top, width, height, allDirection = 
  * @param {object} instance
  */
 export function cellIsDiag(src, target) {
-  return Math.abs(target.i - src.i) === Math.abs(target.j - src.j)
+  return Math.abs(target.position.x - src.position.x) === Math.abs(target.position.z - src.position.z)
 }
 
 export function degreeToDirection(degree) {

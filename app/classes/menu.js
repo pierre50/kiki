@@ -9,7 +9,7 @@ import {
   isValidCondition,
   getBuildingAsset,
 } from '../lib'
-import { cellWidth, cellHeight, longClickDuration, isMobile } from '../constants'
+import { cellWidth, cellHeight, longClickDuration, isMobile, technology, data } from '../constants'
 
 export default class Menu {
   constructor(context) {
@@ -173,7 +173,7 @@ export default class Menu {
     resourceContext.translate(translate, 0)
 
     //if (map.revealEverything || map.revealTerrain) {
-      this.revealTerrainMinimap()
+    this.revealTerrainMinimap()
     //}
   }
 
@@ -196,14 +196,7 @@ export default class Menu {
         const cell = map.grid[i][j]
         const x = cell.x
         const y = cell.z
-        canvasDrawDiamond(
-          context,
-          x / 5,
-          y / 5,
-          1,
-          1,
-          cell.color
-        )
+        canvasDrawDiamond(context, x / 5, y / 5, 1, 1, cell.color)
       }
     }
   }
@@ -273,7 +266,7 @@ export default class Menu {
     context.clearRect(-translate, 0, canvas.width, canvas.height)
 
     map.resources.forEach(resource => {
-      const cell = player.views[resource.i][resource.j]
+      const cell = player.views[resource.position.x][resource.position.z]
       if (resource.color && (cell.viewed || map.revealEverything)) {
         const finalX = resource.x / minimapFactor - squareSize / 2
         const finalY = resource.y / minimapFactor - squareSize / 2
@@ -377,7 +370,7 @@ export default class Menu {
     msg.className = 'message-content'
 
     box.appendChild(msg)
-    window.gamebox.appendChild(box)
+    document.body.appendChild(box)
     setTimeout(() => {
       box.remove()
     }, 3000)
@@ -485,7 +478,7 @@ export default class Menu {
               icon: 'interface/50721/003_50721.png',
               id: `${type}-cancel`,
               onClick: selection => {
-                sound.play('5036')
+                //sound.play('5036')
                 selection.cancelTechnology()
               },
             },
@@ -515,14 +508,14 @@ export default class Menu {
 
           if (btn.children) {
             box.addEventListener('pointerup', () => {
-              sound.play('5036')
+              //sound.play('5036')
               element.textContent = ''
               controls.removeMouseBuilding()
               setMenuRecurs(selection, element, btn.children, menu)
             })
           } else if (typeof btn.onClick === 'function') {
             box.addEventListener('pointerup', evt => {
-              sound.play('5036')
+              //sound.play('5036')
               btn.onClick(selection, evt)
             })
           }
@@ -537,14 +530,14 @@ export default class Menu {
         img.src = 'interface/50721/010_50721.png'
         if (parent) {
           back.addEventListener('pointerup', () => {
-            sound.play('5036')
+            //sound.play('5036')
             element.textContent = ''
             controls.removeMouseBuilding()
             setMenuRecurs(selection, element, parent)
           })
         } else {
           back.addEventListener('pointerup', () => {
-            sound.play('5036')
+            //sound.play('5036')
             controls.removeMouseBuilding()
             player.unselectAll()
           })
@@ -575,7 +568,7 @@ export default class Menu {
           cancel.style.display = 'none'
         }
         cancel.addEventListener('pointerup', () => {
-          sound.play('5036')
+          //sound.play('5036')
           for (let i = 0; i < selection.queue.length; i++) {
             if (selection.queue[i] === type) {
               refundCost(player, unit.cost)
@@ -592,7 +585,7 @@ export default class Menu {
         img.src = getIconPath(unit.icon)
         img.className = 'img'
         img.addEventListener('pointerup', () => {
-          sound.play('5036')
+          //sound.play('5036')
           if (canAfford(player, unit.cost)) {
             if (player.population >= player.populationMax) {
               this.showMessage('You need to build more houses')
@@ -625,12 +618,12 @@ export default class Menu {
     return {
       id: type,
       icon: () => {
-        const assets = getBuildingAsset(type, player, Assets)
+        const assets = getBuildingAsset(type, player, data)
         return getIconPath(assets.icon)
       },
       hide: () => (config.conditions || []).some(condition => !isValidCondition(condition, player)),
       onClick: () => {
-        const assets = getBuildingAsset(type, player, Assets)
+        const assets = getBuildingAsset(type, player, data)
         controls.removeMouseBuilding()
         if (canAfford(player, config.cost)) {
           controls.setMouseBuilding({ ...config, ...assets, type })
@@ -645,7 +638,7 @@ export default class Menu {
     const {
       context: { controls, player },
     } = this
-    const config = Assets.cache.get('technology')[type]
+    const config = technology[type]
     return {
       icon: getIconPath(config.icon),
       id: type,

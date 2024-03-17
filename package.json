@@ -1,7 +1,7 @@
 {
-  "name": "babylon",
+  "name": "rts-game-3d",
   "version": "1.0.0",
-  "description": "Babylon JS",
+  "description": "RTS Game 3D",
   "main": "main.js",
   "scripts": {
     "compile": "pnpm build && electron-builder",
@@ -32,6 +32,7 @@
     ]
   },
   "dependencies": {
+    "point-in-polygon": "^1.1.0",
     "popmotion": "^11.0.5",
     "redux": "^5.0.1"
   },
