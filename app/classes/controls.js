@@ -89,10 +89,10 @@ export default class Controls {
     scene.onPointerDown = evt => this.onMouseDown(evt)
     scene.onPointerMove = evt => this.onMouseMove(evt)
     scene.onPointerUp = evt => this.onMouseUp(evt)
-    /*
-    document.addEventListener('pointermove', evt => this.onMouseMove(evt))
-    document.addEventListener('pointerdown', evt => this.onMouseDown(evt))
-    document.addEventListener('pointerup', evt => this.onMouseUp(evt))*/
+    
+    /*document.addEventListener('mousemove', evt => this.onMouseMove(evt))
+    document.addEventListener('mousedown', evt => this.onMouseDown(evt))
+    document.addEventListener('mouseup', evt => this.onMouseUp(evt))*/
   }
 
   onMouseDown(evt) {
@@ -129,7 +129,46 @@ export default class Controls {
     const {
       context: { map, player, app, scene },
     } = this
-    if (this.mousePos0 && pointsDistance(this.mousePos0.x, this.mousePos0.y, scene.pointerX, scene.pointerY) > 5) {
+    if (this.mouseBuilding) {
+      const pos = scene.pick(scene.pointerX, scene.pointerY)?.pickedPoint 
+      if (pos){
+        const cell = map.grid[Math.round(pos.x)] && map.grid[Math.round(pos.x)][Math.round(pos.z)]
+        if (cell){
+          this.mouseBuilding.mesh.position.x = pos.x
+          this.mouseBuilding.mesh.position.y = cell.y + 1
+          this.mouseBuilding.mesh.position.z = pos.z
+          let isFree = true
+          const dist = this.mouseBuilding.size === 3 ? 1 : 0
+          if (this.mouseBuilding.buildOnWater) {
+            let waterBorderedCells = 0
+            let waterCells = 0
+            getPlainCellsAroundPoint(cell.x, cell.z, map.grid, dist, cell => {
+              if (cell.inclined || cell.solid) {
+                isFree = false
+                return
+              }
+              if (cell.waterBorder) {
+                waterBorderedCells++
+              } else if (cell.category === 'Water') {
+                waterCells++
+              }
+            })
+            if (waterBorderedCells < 2 || waterCells < 4) {
+              isFree = false
+            }
+          } else {
+            getPlainCellsAroundPoint(cell.x, cell.z, map.grid, dist, cell => {
+              if (cell.category === 'Water' || cell.solid || cell.inclined || cell.border) {
+                isFree = false
+                return
+              }
+            })
+          }
+          this.mouseBuilding.isFree = isFree
+        }
+      }
+
+    }else if (this.mousePos0 && pointsDistance(this.mousePos0.x, this.mousePos0.y, scene.pointerX, scene.pointerY) > 5) {
       this.mousePos1 = { x: scene.pointerX, y: scene.pointerY }
       let rays = []
       rays.push(scene.createPickingRay(this.mousePos0.x, this.mousePos0.y))
@@ -149,102 +188,6 @@ export default class Controls {
       if (this.mousePos1.y < this.mousePos0.y) {
         this.lines.scaling.y *= -1
       }
-    }
-
-    return
-    this.mouse.x = evt.pageX
-    this.mouse.y = evt.pageY
-
-    // Mouse building to place construction
-    if (this.mouseBuilding) {
-      const pos = isometricToCartesian(
-        this.mouse.x - map.x,
-        this.mouse.y >= app.screen.height ? app.screen.height - map.y : this.mouse.y - map.y
-      )
-      const i = Math.min(Math.max(pos[0], 0), map.size)
-      const j = Math.min(Math.max(pos[1], 0), map.size)
-      if (map.grid[i] && map.grid[i][j]) {
-        const cell = map.grid[i][j]
-        this.mouseBuilding.x = cell.x - this.camera.x
-        this.mouseBuilding.y = cell.y - this.camera.y
-        let isFree = true
-
-        const dist = this.mouseBuilding.size === 3 ? 1 : 0
-        if (this.mouseBuilding.buildOnWater) {
-          let waterBorderedCells = 0
-          let waterCells = 0
-          getPlainCellsAroundPoint(i, j, map.grid, dist, cell => {
-            if (cell.inclined || cell.solid || !cell.visible) {
-              isFree = false
-              return
-            }
-            if (cell.waterBorder) {
-              waterBorderedCells++
-            } else if (cell.category === 'Water') {
-              waterCells++
-            }
-          })
-          if (waterBorderedCells < 2 || waterCells < 4) {
-            isFree = false
-          }
-        } else {
-          getPlainCellsAroundPoint(i, j, map.grid, dist, cell => {
-            if (cell.category === 'Water' || cell.solid || cell.inclined || cell.border || !cell.visible) {
-              isFree = false
-              return
-            }
-          })
-        }
-        // Color image of mouse building depend on buildable or not
-        const sprite = this.mouseBuilding.getChildByName('sprite')
-        const color = this.mouseBuilding.getChildByName('color')
-        if (isFree) {
-          sprite.tint = colorWhite
-          if (color) {
-            color.tint = colorWhite
-          }
-        } else {
-          sprite.tint = colorRed
-          if (color) {
-            color.tint = colorRed
-          }
-        }
-        this.mouseBuilding.isFree = isFree
-      }
-      return
-    }
-
-    // Create and draw mouse selection
-    if (
-      !this.mouseRectangle &&
-      this.pointerStart &&
-      pointsDistance(this.mouse.x, this.mouse.y, this.pointerStart.x, this.pointerStart.y) > 5
-    ) {
-      this.mouseRectangle = {
-        x: this.pointerStart.x,
-        y: this.pointerStart.y,
-        width: 0,
-        height: 0,
-      }
-    }
-
-    if (this.mouseRectangle && !this.mouseBuilding) {
-      if (player && (player.selectedUnits.length || player.selectedBuilding)) {
-        player.unselectAll()
-      }
-      const { canvasContext, canv } = this
-      this.mouseRectangle.width = Math.round(this.mouse.x - this.mouseRectangle.x)
-      this.mouseRectangle.height = Math.round(this.mouse.y - this.mouseRectangle.y)
-      canvasContext.clearRect(0, 0, canv.width, canv.height)
-      canvasContext.strokeStyle = '#ffffff'
-      canvasContext.beginPath()
-      canvasContext.rect(
-        this.mouseRectangle.x,
-        this.mouseRectangle.y,
-        this.mouseRectangle.width,
-        this.mouseRectangle.height
-      )
-      canvasContext.stroke()
     }
   }
 
@@ -478,7 +421,7 @@ export default class Controls {
             }
           }
           if (hasSentAttacker) {
-            drawInstanceBlinkingSelection(instance)
+            //drawInstanceBlinkingSelection(instance)
           } else if (
             (player.selectedOther !== instance && instanceIsInPlayerSight(instance, player)) ||
             map.revealEverything
@@ -540,199 +483,6 @@ export default class Controls {
     }
     this.lines.dispose()
     scene.createPickingRay()
-    return
-    //const pickResult = scene.pick(scene.pointerX, scene.pointerY)
-    player && player.selectedBuilding && player.unselectAll()
-    clearTimeout(this.mouseHoldTimeout)
-    if (this.mouse.prevent || this.mouseDrag) {
-      this.mouse.prevent = false
-    } else if (this.mouseRectangle) {
-      let selectVillager
-      let countSelect = 0
-      // Select units inside the rectangle
-      if (player) {
-        const getPos = (x, y, scene, map) => {
-          const pickResult = scene.pick(x, y)?.pickedPoint
-          if (!pickResult) {
-            const p1 = scene.pick(Math.max(Math.min(x, 0), map.size), y)?.pickedPoint
-            const p2 = scene.pick(x, Math.max(Math.min(y, 0), map.size))?.pickedPoint
-            return [p1 && [p1.x, p1.z], p2 && [p2.x, p2.z]].filter(Boolean)
-          } else {
-            return [[pickResult.x, pickResult.z]]
-          }
-        }
-
-        const calculatePixel = (obj, camera) => {
-          const temp = new Vector3()
-          const vertices = obj.getBoundingInfo().boundingBox.vectorsWorld
-          const engine = scene.getEngine()
-          const viewport = camera.viewport.toGlobal(engine.getRenderWidth(), engine.getRenderHeight())
-          let minX = 1e10,
-            minY = 1e10,
-            maxX = -1e10,
-            maxY = -1e10
-          for (const vertex of vertices) {
-            Vector3.ProjectToRef(vertex, Matrix.IdentityReadOnly, scene.getTransformMatrix(), viewport, temp)
-            if (minX > temp.x) minX = temp.x
-            if (maxX < temp.x) maxX = temp.x
-            if (minY > temp.y) minY = temp.y
-            if (maxY < temp.y) maxY = temp.y
-          }
-          const canvasZone = engine.getRenderingCanvas().parentNode
-          const ofstX = canvasZone.offsetLeft
-          const ofstY = canvasZone.offsetTop
-
-          return {
-            left: minX + ofstX,
-            top: minY + ofstY,
-            width: maxX - minX,
-            height: maxY - minY,
-          }
-        }
-        function rotate_point(pointX, pointY, originX, originY, angle) {
-          angle = (angle * Math.PI) / 180.0
-          return {
-            x: Math.cos(angle) * (pointX - originX) - Math.sin(angle) * (pointY - originY) + originX,
-            y: Math.sin(angle) * (pointX - originX) + Math.cos(angle) * (pointY - originY) + originY,
-          }
-        }
-        const cartesianToIso = (x, y) => {
-          return Vector3.Unproject(
-            new Vector3(x, y, 0.99),
-            canvas.width,
-            canvas.height,
-            Matrix.Identity(),
-            scene.getViewMatrix(),
-            scene.getProjectionMatrix()
-          )
-        }
-
-        const t = cartesianToIso(0, 0)
-        const angle = 90
-        const a = scene.pick(this.mouseRectangle?.x, this.mouseRectangle?.y)?.pickedPoint
-        if (a) {
-          const origin = {
-            x: a.x,
-            y: a.z,
-          }
-          const ta = calculatePixel(map.ground, this.camera)
-          const coefX = ta.width / map.size
-          const coefY = ta.height / map.size
-          const p1 = rotate_point(a.x, a.z, origin.x, origin.y, angle)
-          const p2 = rotate_point(a.x - this.mouseRectangle.width / coefX, a.z, origin.x, origin.y, angle)
-          const p3 = rotate_point(
-            a.x - this.mouseRectangle.width / coefX,
-            a.z - this.mouseRectangle.height / coefY,
-            origin.x,
-            origin.y,
-            angle
-          )
-          const p4 = rotate_point(a.x, a.z - this.mouseRectangle.height / coefY, origin.x, origin.y, angle)
-
-          const material = new StandardMaterial('material', scene)
-          material.diffuseColor = Color3.FromHexString('#52392a')
-          material.freeze()
-
-          const box1 = MeshBuilder.CreateSphere('box', { diameter: 1, color: Color3.Red() }, scene)
-          box1.material = material
-          box1.position = new Vector3(p1.x, 0, p1.y)
-          const box2 = MeshBuilder.CreateSphere('box', { diameter: 1, color: Color3.Green() }, scene)
-          box2.position = new Vector3(p2.x, 0, p2.y)
-          const box3 = MeshBuilder.CreateSphere('box', { diameter: 1, color: Color3.Blue() }, scene)
-          box3.position = new Vector3(p3.x, 0, p3.y)
-          const box4 = MeshBuilder.CreateSphere('box', { diameter: 1, color: Color3.Yellow() }, scene)
-          box4.position = new Vector3(p4.x, 0, p4.y)
-        }
-
-        if (this.mouseRectangle) {
-          player.unselectAll()
-          const poly = [
-            ...getPos(this.mouseRectangle.x, this.mouseRectangle.y, scene, map),
-            ...getPos(this.mouseRectangle.x + this.mouseRectangle.width, this.mouseRectangle.y, scene, map),
-            ...getPos(
-              this.mouseRectangle.x + this.mouseRectangle.width,
-              this.mouseRectangle.y + this.mouseRectangle.height,
-              scene,
-              map
-            ),
-            ...getPos(this.mouseRectangle.x, this.mouseRectangle.y + this.mouseRectangle.height, scene, map),
-          ]
-          for (let i = 0; i < player.units.length; i++) {
-            const unit = player.units[i]
-            if (
-              player.selectedUnits.length < maxSelectUnits &&
-              pointInPolygon([unit.position.x, unit.position.z], poly)
-            ) {
-              unit.select()
-              countSelect++
-              if (unit.type === 'Villager') {
-                selectVillager = unit
-              }
-              player.selectedUnits.push(unit)
-            }
-          }
-
-          // Set our bottombar
-          if (countSelect) {
-            if (selectVillager) {
-              player.selectedUnit = selectVillager
-              menu.setBottombar(selectVillager)
-            } else {
-              // TODO SELECT UNITS THAT HAVE THE MOST FREQUENCY
-              player.selectedUnit = player.selectedUnits[0]
-              menu.setBottombar(player.selectedUnits[0])
-            }
-          }
-        }
-      }
-    } else if (pickResult && pickResult.pickedPoint) {
-      const x = Math.round(pickResult.pickedPoint.x)
-      const z = Math.round(pickResult.pickedPoint.z)
-      if (map.grid[x] && map.grid[x][z]) {
-        const cell = map.grid[x][z]
-        if ((cell.solid || cell.has) && cell.visible) {
-          return
-        }
-        if (this.mouseBuilding) {
-          if (cell.inclined || cell.border) {
-            return
-          }
-          if (this.mouseBuilding.isFree) {
-            if (player.buyBuilding(x, z, this.mouseBuilding.type)) {
-              this.removeMouseBuilding()
-              if (menu.selection) {
-                menu.setBottombar(menu.selection)
-              }
-            }
-          }
-        } else if (player.selectedUnits.length) {
-          // Pointer animation
-          /*const pointerSheet = Assets.cache.get('50405')
-          const pointer = new AnimatedSprite(pointerSheet.animations['animation'])
-          pointer.animationSpeed = 0.2 * accelerator
-          pointer.loop = false
-          pointer.anchor.set(0.5, 0.5)
-          pointer.x = this.mouse.x
-          pointer.y = this.mouse.y
-          pointer.allowMove = false
-          pointer.allowClick = false
-          pointer.eventMode = 'auto'
-          pointer.roundPixels = true
-          pointer.onComplete = () => {
-            pointer.destroy()
-          }
-          pointer.play()
-          this.addChild(pointer)*/
-          // Send units
-          this.sendUnits(cell)
-        }
-      }
-    }
-    // Reset mouse selection
-    const { canvasContext, canv } = this
-    canvasContext.clearRect(0, 0, canv.width, canv.height)
-    this.mouseRectangle = null
-    this.pointerStart = null
   }
 
   sendUnits(cell) {
@@ -780,34 +530,42 @@ export default class Controls {
     if (!this.mouseBuilding) {
       return
     }
-    this.removeChild(this.mouseBuilding)
-    this.mouseBuilding.destroy()
+    this.mouseBuilding.mesh.dispose()
     this.mouseBuilding = null
   }
 
   setMouseBuilding(building) {
     const {
-      context: { player },
+      context: { map, meshes, scene },
     } = this
-    this.mouseBuilding = new Container()
-    const sprite = Sprite.from(getTexture(building.images.final, Assets))
+    const pos = scene.pick(scene.pointerX, scene.pointerY)?.pickedPoint 
+    if (pos){
+      const cell = map.grid[Math.round(pos.x)] && map.grid[Math.round(pos.x)][Math.round(pos.z)]
+      if (cell){
+        const mesh = meshes[building.type].createInstance()
+      mesh.position.x = pos.x
+      mesh.position.y = cell.position.y + 0.5 / 2
+      mesh.position.z = pos.z
+      this.mouseBuilding = {
+        ...building,
+        mesh
+      }
+    }
+    }
+  
+    /*const sprite = Sprite.from(getTexture(building.images.final, Assets))
     sprite.name = 'sprite'
-    this.mouseBuilding.addChild(sprite)
-    Object.keys(building).forEach(prop => {
-      this.mouseBuilding[prop] = building[prop]
-    })
-    this.mouseBuilding.x = this.mouse.x
-    this.mouseBuilding.y = this.mouse.y
-    this.mouseBuilding.name = 'mouseBuilding'
-    if (building.images.color) {
+    this.mouseBuilding.addChild(sprite)*/
+    
+    /*if (building.images.color) {
       const color = Sprite.from(getTexture(building.images.color, Assets))
       color.name = 'color'
       changeSpriteColor(color, player.color)
       this.mouseBuilding.addChild(color)
     } else {
       changeSpriteColor(sprite, player.color)
-    }
-    this.addChild(this.mouseBuilding)
+    }*/
+    //this.addChild(this.mouseBuilding)
   }
 
   moveCamera(dir, moveSpeed, isSpeedDivided) {

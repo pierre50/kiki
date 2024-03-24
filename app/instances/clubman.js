@@ -1,7 +1,7 @@
 import { AbstractMesh, Color3, Mesh, MeshBuilder, StandardMaterial } from "@babylonjs/core";
 
-export function getVillager(scene) {
-    const mesh = Mesh.MergeMeshes([getBody(), getEyes(), getPants(), getHair()], true, true, undefined, false, true);
+export function getClubman(scene) {
+    const mesh = Mesh.MergeMeshes([getBody(), getEyes(), getPants(), getClub(), getHair()], true, true, undefined, false, true);
     mesh.receiveShadows = true;
     mesh.cullingStrategy = AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY;
     mesh.doNotSyncBoundingInfo = false;
@@ -58,6 +58,24 @@ export function getVillager(scene) {
         const mesh = MeshBuilder.CreateBox('body', options, scene);
         mesh.material = material;
         mesh.position.y = 0.3;
+        return mesh;
+    }
+    function getClub() {
+        const options = {
+            height: 1,
+            width: 0.2,
+            depth: 0.2
+        }
+
+        const material = new StandardMaterial('material', scene);
+        material.diffuseColor = Color3.FromHexString('#775E38');
+        material.freeze();
+
+        const mesh = MeshBuilder.CreateBox('body', options, scene);
+        mesh.material = material;
+        mesh.position.y = 0.5;
+        mesh.position.z = 0.4;
+        mesh.rotation.z = Math.PI / 4
         return mesh;
     }
     function getEyes() {

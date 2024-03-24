@@ -8,6 +8,9 @@ import { getBerryBush } from '../instances/berrybush'
 import { getGold } from '../instances/gold'
 import { getStone } from '../instances/stone'
 import { getTownCenter } from '../instances/towncenter'
+import { getHouse } from '../instances/house'
+import { getBarracks } from '../instances/barracks'
+import { getClubman } from '../instances/clubman'
 
 export default class Game {
   constructor() {
@@ -43,12 +46,18 @@ export default class Game {
       map: null,
       controls: null,
       meshes: {
+        //Ressources
         Tree: getTree(scene),
-        Villager: getVillager(scene),
-        TownCenter: getTownCenter(scene),
         Berrybush: getBerryBush(scene),
-        Gold: getGold(scene),
         Stone: getStone(scene),
+        Gold: getGold(scene),
+        // Units
+        Villager: getVillager(scene),
+        Clubman: getClubman(scene),
+        // Buildings
+        TownCenter: getTownCenter(scene),
+        House: getHouse(scene),
+        Barracks: getBarracks(scene),
       },
     }
 

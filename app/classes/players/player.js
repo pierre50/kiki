@@ -84,9 +84,9 @@ export class Player {
         }
       }
       if (hasSentVillager) {
-        drawInstanceBlinkingSelection(building)
+        //drawInstanceBlinkingSelection(building)
       }
-      if (hasSentOther) {
+      /*if (hasSentOther) {
         const voice = randomItem(['5075', '5076', '5128', '5164'])
         sound.play(voice)
         return
@@ -94,7 +94,7 @@ export class Player {
         const voice = this.config.units.Villager.sounds.build
         sound.play(voice)
         return
-      }
+      }*/
     }
 
     return building
